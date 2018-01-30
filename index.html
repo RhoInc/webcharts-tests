@@ -162,12 +162,14 @@ function drawCharts(path, root, type){
 
 }
 
-function initTestSuite(version){
-  var root = "https://rawgit.com/RhoInc/Webcharts/"+version+"/test";
-  var rendererPath = "https://rawgit.com/RhoInc/Webcharts/"+version+"/build/webcharts.js";
+function initTestSuite(version,path){
+  //attempt to load from a relative path if one is given (allows for local testing)
+  var location = version.slice(0,3)=="../" ? version : path+version
+  var root = location+"/test";
+  var rendererPath = location+"/build/webcharts.js";
 
   var link = document.createElement("link");
-  link.href ="https://rawgit.com/RhoInc/Webcharts/"+version+"/css/webcharts.css"
+  link.href =location+"/css/webcharts.css"
   link.type = "text/css";
   link.rel = "stylesheet";
   document.getElementsByTagName("head")[0].appendChild(link);
@@ -227,7 +229,7 @@ d3.select(".versionSelect").append("button").text("Render Visual Tests")
   d3.selectAll(".charts *").remove()
   d3.selectAll(".controls *").remove()
   var version = webchartsVersion.node().value
-  initTestSuite(version)
+  initTestSuite(version,"https://rawgit.com/RhoInc/Webcharts/")
 })
 
 
