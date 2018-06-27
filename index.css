@@ -1,64 +1,138 @@
-body{
-  background:#bbb;
-  margin:1em;
+@import url(https: //fonts.googleapis.com/css?family=Open+Sans: 400,300);
+* {
+    padding: 0;
+    margin: 0;
 }
-
-div.testWrap, #big-one{
-  border:2px solid black;
-  background:white;
-  padding:1em;
-  margin:1em 5em 1em 5em;
+body {
+    background: #bbb;
 }
-
-div.testWrap .chart{
-  border:1px dotted #444;
-  margin:1em;
-  padding:1em;
+#title {
+    width: 96%;
+    padding: 0 0 12px 0;
+    border-bottom: 2px solid black;
+    margin: 24px 2% 12px 2%;
+    font-size: 32px;
+    font-weight: normal;
+    font-family: 'Open Sans';
 }
-
-div.testWrap .chart, div.testWrap .notes{
-  display:inline-block;
+#subtitle {
+    width: 96%;
+    margin: 0 2% 12px 2%;
+    font-size: 24px;
+    font-weight: lighter;
+    font-family: 'Open Sans';
 }
-
-div.testWrap .notes{
-  width:350px;
-  vertical-align:top;
-  margin:1em;
+#container {
+    width: 96%;
+    margin: 12px 2%;
+    display: inline-block;
 }
-
-div.testWrap .notes div{
-padding-top:.5em;
+#container > * {
+    width: 98%;
+    padding: .5em 1%;
+    border: 2px solid black;
 }
-
-div.testWrap h2, div.testWrap .notes div ul{
-  margin-top:0
+.hidden {
+    display: none !important;
 }
-
-
-.hidden{
-  display:none
-}
-
-div.versionSelect{
-  padding:0.5em;
-  background:white;
-  border:1px solid #999;
-  border-radius: 5px;
-  margin-bottom:1em
-
-}
-div.versionSelect *{
-  margin-right:1em
-}
-
-span.error{
-  padding:0.5em;
-  background:pink;
-  border:2px solid red;
-  border-radius: 5px;
+.error {
+    padding: 0.5em;
+    background: pink;
+    border: 2px solid red;
+    border-radius: 5px;
 
 }
 
-div#big-one{
-  width:1100px;
-}
+/*------------------------------------------------------------------------------------------------\
+  Webcharts Version
+\------------------------------------------------------------------------------------------------*/
+
+	#container > .versionSelect {
+        width: 98%;
+        background: white;
+        border-radius: 5px;
+        margin-bottom: 1em;
+        font-family: 'Open Sans';
+    }
+	.versionSelect > * {
+	    margin-right: 5px;
+    }
+
+/*------------------------------------------------------------------------------------------------\
+  Controls
+\------------------------------------------------------------------------------------------------*/
+
+    #container > .controls {
+        border: 2px solid #bbb;
+    }
+
+/*------------------------------------------------------------------------------------------------\
+  Charts
+\------------------------------------------------------------------------------------------------*/
+
+    #container > .charts {
+        border: 2px solid #bbb;
+    }
+    #container > .charts div.testWrap {
+        border: 2px solid black;
+        background: white;
+        padding: 1em;
+        margin: 1em 0;
+    }
+    #container > .charts div.testWrap .chart {
+        border: 1px dotted #444;
+        margin: 1em;
+        padding: 1em;
+    }
+    #container > .charts div.testWrap .chart,
+    #container > .charts div.testWrap .notes {
+        display: inline-block;
+    }
+
+    #container > .charts div.testWrap .notes {
+        width: 350px;
+        vertical-align: top;
+        margin: 1em;
+    }
+    #container > .charts div.testWrap .notes div {
+        padding-top: .5em;
+    }
+
+    #container > .charts div.testWrap .notes div ul {
+        margin-top: 0;
+        padding-left: 40px;
+    }
+    #container button {
+        margin-top: 10px;
+    }
+
+    /*------------------------------------------------------------------------------------------------\
+      Settings area
+    \------------------------------------------------------------------------------------------------*/
+
+        .settings-toggle {
+            width: 100%;
+            display: block;
+            cursor: pointer;
+        }
+        .code-block {
+            width: 49%;
+            display: inline-block;
+            margin-top: 1em !important;
+        }
+        .code-block code {
+            border: 1px solid white;
+        }
+        .code-block--input {
+            float: right;
+            padding: .5em !important;
+        }
+
+/*------------------------------------------------------------------------------------------------\
+  Big One
+\------------------------------------------------------------------------------------------------*/
+
+    #big-one {
+        background: white;
+        margin: 1em 0;
+    }
