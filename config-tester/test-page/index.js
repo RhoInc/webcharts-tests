@@ -1,5 +1,5 @@
     const element = '#chart';
-    const settings1 = {
+    const settings = {
         x: {
             type: 'ordinal',
             column: 'species',
@@ -34,11 +34,10 @@
     const chart = new webCharts.createChart(
         element,
         settings,
-        controls
     );
 
     d3.csv(
-        '../../viz-library/data/iris.csv',
+        '../../../viz-library/data/iris.csv',
         (d,i) => {
             d.seq = i;
             return d;
