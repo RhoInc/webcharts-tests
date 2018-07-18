@@ -16,14 +16,66 @@
     <body>
         <div id = 'title'>Webcharts Tests</div>
         <div id = 'container'>
-            <div id = 'general-settings'></div>
-            <div id = 'y-axis-settings'></div>
-            <div id = 'chart'></div>
-            <div id = 'mark-settings'></div>
-            <div id = 'x-axis-settings'></div>
+            <div class = 'column column--left' id = 'chart-framework'>
+                <div class = 'component component--top settings' id = 'general-settings'>
+                    <h3>General Settings</h3>
+                    <div></div>
+                </div>
+                <div class = 'component component--left settings' id = 'y-axis-settings'>
+                    <h3>Y-axis Settings</h3>
+                    <div></div>
+                </div>
+                <div class = 'component component--middle' id = 'chart'></div>
+                <div class = 'component component--right settings' id = 'mark-settings'>
+                    <h3>Mark Settings</h3>
+                    <div></div>
+                </div>
+                <div class = 'component component--bottom settings' id = 'x-axis-settings'>
+                    <h3>X-axis Settings</h3>
+                    <div></div>
+                </div>
+            </div>
+
+            <div class = 'column column--right' id = 'code-framework'>
+                <div id = 'text-settings'>
+                    <h3>Settings</h3>
+                    <textarea class = 'text-area'></textarea>
+                </div>
+
+                <div id = 'callbacks'>
+                    <h3>Callbacks</h3>
+                    <div class = 'callback' id = 'init'>
+                        <label class = 'callback-label'>init</label>
+                        <textarea class = 'text-area callback-input'></textarea>
+                    </div>
+                    <div class = 'callback' id = 'layout'>
+                        <label class = 'callback-label'>layout</label>
+                        <textarea class = 'text-area callback-input'></textarea>
+                    </div>
+                    <div class = 'callback' id = 'preprocess'>
+                        <label class = 'callback-label'>preprocess</label>
+                        <textarea class = 'text-area callback-input'></textarea>
+                    </div>
+                    <div class = 'callback' id = 'datatransform'>
+                        <label class = 'callback-label'>datatransform</label>
+                        <textarea class = 'text-area callback-input'></textarea>
+                    </div>
+                    <div class = 'callback' id = 'draw'>
+                        <label class = 'callback-label'>draw</label>
+                        <textarea class = 'text-area callback-input'></textarea>
+                    </div>
+                    <div class = 'callback' id = 'resize'>
+                        <label class = 'callback-label'>resize</label>
+                        <textarea class = 'text-area callback-input'></textarea>
+                    </div>
+                    <div class = 'callback' id = 'destroy'>
+                        <label class = 'callback-label'>destroy</label>
+                        <textarea class = 'text-area callback-input'></textarea>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 
     <script type = 'text/javascript' src = 'index.js'></script>
 </html>
-
