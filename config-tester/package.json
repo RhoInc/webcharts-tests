@@ -8,7 +8,7 @@
     "build": "npm run bundle && npm run format",
     "bundle": "rollup -c",
     "format": "npm run format-src && npm run format-bundle",
-    "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write \"./src/**/*.js\"",
+    "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write \"./src/**/!(*layout|*styles).js\"",
     "format-bundle": "prettier --print-width=100 --tab-width=4 --single-quote --write ./configTester.js",
     "watch": "rollup -c -w"
   },

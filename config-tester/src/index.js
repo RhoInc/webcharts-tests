@@ -1,18 +1,49 @@
 import layout from './layout';
+import eventListeners from './eventListeners';
+import createChart from './createChart';
+import init from './init';
 
 export default function configTester(element, settings) {
     const configTester = {
         element,
-        settings,
+        settings: {
+            chart: settings,
+            general: Object.keys(settings)
+                .filter(key => ['x', 'y', 'marks'].indexOf(key) < 0)
+                .reduce(
+                    (acc, cur) => {
+                        acc[cur] = settings[cur];
+                        return acc;
+                    },
+                    {}
+                ),
+            y: settings.y,
+            marks: settings.marks,
+            x: settings.x,
+        },
+        callbacks: {
+            init: null,
+            layout: null,
+            preprocess: null,
+            datatransform: null,
+            draw: null,
+            resize: null,
+            destroy: null,
+        },
         containers: {
             main: d3.select(element)
                 .append('div')
                 .classed('config-tester', true)
-                .attr('id', `config-tester${d3.selectAll('.config-tester').size() + 1}`)
-        }
+                .attr('id', `config-tester${d3.selectAll('.config-tester').size() + 1}`),
+            settings: [],
+            callbacks: [],
+        },
+        init,
     };
 
     layout.call(configTester);
+    eventListeners.call(configTester);
+    createChart.call(configTester);
 
     return configTester;
 }
