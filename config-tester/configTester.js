@@ -34,13 +34,13 @@
 
             return d;
         })).enter().append('div').attr('class', function (d) {
-            return 'ct-component ct-component--' + location + ' ct-' + d.label.toLowerCase().split(' ').join('-');
+            return 'ct-component ct-component--' + d.location + ' ct-' + d.label.toLowerCase().split(' ').join('-');
         }).each(function (d) {
             var component = d3.select(this);
 
             //Attach component to containers object.
             d.container = component;
-            context.containers.settings.push(component);
+            if (d.property !== 'chart') context.containers.settings.push(component);else context.containers[d.property] = component;
 
             //Add header and input.
             if (d.location !== 'middle') {
@@ -49,11 +49,11 @@
             }
         });
 
-        this.containers.callbacks = this.containers.main.append('div').classed('ct-row ct-row--bottom callbacks', true);
+        this.containers.callbacksContainer = this.containers.main.append('div').classed('ct-row ct-row--bottom callbacks', true);
 
-        this.containers.callbacks.append('h1').text('Callbacks');
+        this.containers.callbacksContainer.append('h1').text('Callbacks');
 
-        this.containers.callbacks.selectAll('div.ct-component').data([{
+        this.containers.callbacksContainer.selectAll('div.ct-component').data([{
             label: 'init',
             description: 'called once before chart container is laid out on webpage'
         }, {
@@ -138,8 +138,8 @@
                 var updatedSettings = JSON.parse(this.value);
 
                 if (d.property !== 'general') {
-                    context.settings[d.property] = updatedSettings;
-                    context.chart.config[d.property] = updatedSettings;
+                    context.settings[d.setting] = updatedSettings;
+                    context.chart.config[d.setting] = updatedSettings;
                 } else {
                     var properties = Object.keys(updatedSettings).filter(function (key) {
                         return ['x', 'y', 'marks'].indexOf(key) < 0;
@@ -192,24 +192,21 @@
         var context = this;
 
         this.containers.callbacks.forEach(function (container) {
-            console.log(container);
             container.select('textarea').on('change', function (d) {
                 context.callbacks[d.label] = this.value;
 
                 context.chart.on(d.label, function () {
                     try {
-                        var _eval_ = eval;
-                        _eval_(context.callbacks[d.label]);
-                        //const callback = new Function(context.callbacks[d.label]);
+                        eval(context.callbacks[d.label]);
                     } catch (error) {
                         alert("That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key.");
                         console.error(error);
                     }
                 });
 
-                if (['init', 'layout', 'destroy'].indexOf(d.label) < 0) chart.draw();else {
-                    chart.destroy();
-                    chart.init(context.data);
+                if (['init', 'layout', 'destroy'].indexOf(d.label) < 0) context.chart.draw();else {
+                    context.chart.destroy();
+                    context.chart = webCharts.createChart(context.containers.chart.node(), context.settings.chart).init(context.data);
                 }
             });
         });
@@ -221,7 +218,7 @@
     }
 
     function createChart() {
-        this.chart = new Webcharts.createChart(this.containers.chart.node(), this.settings.chart);
+        this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
     }
 
     function init(data) {

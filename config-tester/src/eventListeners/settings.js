@@ -7,8 +7,8 @@ export default function settings() {
                 const updatedSettings = JSON.parse(this.value);
 
                 if (d.property !== 'general') {
-                    context.settings[d.property] = updatedSettings;
-                    context.chart.config[d.property] = updatedSettings;
+                    context.settings[d.setting] = updatedSettings;
+                    context.chart.config[d.setting] = updatedSettings;
                 } else {
                     const properties = Object.keys(updatedSettings)
                         .filter(key => ['x', 'y', 'marks'].indexOf(key) < 0);

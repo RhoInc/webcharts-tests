@@ -45,13 +45,16 @@ export default function layout() {
                 )
                 .enter()
             .append('div')
-            .attr('class', d => `ct-component ct-component--${location} ct-${d.label.toLowerCase().split(' ').join('-')}`)
+            .attr('class', d => `ct-component ct-component--${d.location} ct-${d.label.toLowerCase().split(' ').join('-')}`)
             .each(function(d) {
                 const component = d3.select(this);
 
                 //Attach component to containers object.
                 d.container = component;
-                context.containers.settings.push(component);
+                if (d.property !== 'chart')
+                    context.containers.settings.push(component);
+                else
+                    context.containers[d.property] = component;
 
                 //Add header and input.
                 if (d.location !== 'middle') {
@@ -66,13 +69,13 @@ export default function layout() {
                 }
             });
 
-    this.containers.callbacks = this.containers.main
+    this.containers.callbacksContainer = this.containers.main
         .append('div')
         .classed('ct-row ct-row--bottom callbacks', true);
 
-        this.containers.callbacks.append('h1').text('Callbacks');
+        this.containers.callbacksContainer.append('h1').text('Callbacks');
 
-        this.containers.callbacks
+        this.containers.callbacksContainer
             .selectAll('div.ct-component')
                 .data(
                     [
