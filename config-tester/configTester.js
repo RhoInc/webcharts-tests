@@ -9,7 +9,7 @@
 
         this.containers.chartFramework = this.containers.main.append('div').classed('ct-row ct-row--top ct-chart-framework', true);
 
-        this.containers.chartFramework.append('h1').text('Chart Framework');
+        this.containers.chartFramework.append('h1').classed('ct-row__header', true).text('Chart Framework');
 
         this.containers.chartFramework.selectAll('div.ct-component').data([{
             label: 'General Settings',
@@ -30,7 +30,7 @@
             d.property = d.label.toLowerCase().replace(' ', '-').split(' ').map(function (d, i) {
                 return i === 0 ? d : d.substring(0, 1).toUpperCase() + d.substring(1);
             }).join('');
-            d.setting = d.label.replace('-', ' ').split(' ')[0].toLowerCase();
+            d.setting = d.label.replace('-', ' ').replace('Mark', 'Marks').split(' ')[0].toLowerCase();
 
             return d;
         })).enter().append('div').attr('class', function (d) {
@@ -45,13 +45,15 @@
             //Add header and input.
             if (d.location !== 'middle') {
                 component.append('h3').classed('ct-component__header', true).text(d.label);
-                component.append('textarea').classed('ct-component__textarea', true).html(JSON.stringify(context.settings[d.setting], null, 4));
+                var settings = JSON.stringify(context.settings[d.setting], null, 4);
+                var textarea = component.append('textarea').classed('ct-component__textarea', true).attr('rows', settings.split('\n').length).html(settings);
+                //CodeMirror.fromTextArea(textarea.node(), codeMirrorSettings);
             }
         });
 
-        this.containers.callbacksContainer = this.containers.main.append('div').classed('ct-row ct-row--bottom callbacks', true);
+        this.containers.callbacksContainer = this.containers.main.append('div').classed('ct-row ct-row--bottom ct-callbacks', true);
 
-        this.containers.callbacksContainer.append('h1').text('Callbacks');
+        this.containers.callbacksContainer.append('h1').classed('ct-row__header', true).text('Callbacks');
 
         this.containers.callbacksContainer.selectAll('div.ct-component').data([{
             label: 'init',
@@ -87,10 +89,82 @@
 
             //Add header, description, and input.
             component.append('h3').classed('ct-component__header', true).text(d.label);
+            var textarea = component.append('textarea').classed('ct-component__textarea', true);
+            //CodeMirror.fromTextArea(textarea.node(), codeMirrorSettings);
             component.append('small').classed('ct-component__description', true).text(d.description);
-            component.append('textarea').classed('ct-component__textarea', true);
         });
     }
+
+    function styles() {
+        var chartHeight = 437;
+
+        var settingsWidth = 32;
+        var settingsPadding = 2;
+        var settingsMargin = 2;
+
+        var callbackWidth = 13;
+        var callbackMargin = 1.5;
+
+        var styles = [
+        /***--------------------------------------------------------------------------------------\
+          Global styles
+        \--------------------------------------------------------------------------------------***/
+
+        '#config-tester {' + '}', '.ct-row {' + 'width: 100%;' + 'display: inline-block;' + '}', '.ct-row__header {' + 'width: 100%;' + 'padding-bottom: 5px;' + 'border-bottom: 1px solid lightgray;' + 'margin-bottom: 5px;' + '}', '.ct-component {' + 'display: inline-block;' + 'vertical-align: top;' + '}', '.ct-component__header {' + 'text-align: left;' + '}', '.ct-component__textarea {' + 'white-space: pre;' + 'font-family: courier;' + 'width: 100%;' + '}',
+
+        /***--------------------------------------------------------------------------------------\
+          Chart framework
+        \--------------------------------------------------------------------------------------***/
+
+        '.ct-chart-framework {' + '}', '.ct-callbacks > .ct-component {' + ('width: ' + settingsWidth + '%;') + '}',
+
+        /*****----------------------------------------------------------------------------\
+          General Settings
+        \----------------------------------------------------------------------------*****/
+
+        '.ct-component--top {' + ('width: ' + settingsWidth + '%;') + ('margin-right: ' + (settingsWidth + settingsMargin) + '%;') + ('margin-left: ' + (settingsWidth + settingsMargin) + '%;') + '}', '.ct-component--top .ct-component__textarea {' + '}',
+
+        /*****----------------------------------------------------------------------------\
+          Y-axis Settings
+        \----------------------------------------------------------------------------*****/
+
+        '.ct-component--left {' + ('width: ' + settingsWidth + '%;') + ('height: ' + chartHeight + 'px;') + 'float: left;' + '}', '.ct-component--left .ct-component__textarea {' + 'height: 100%;' + '}',
+
+        /*****----------------------------------------------------------------------------\
+          Chart
+        \----------------------------------------------------------------------------*****/
+
+        '.ct-chart {' + ('width: ' + settingsWidth + '%;') + ('height: ' + chartHeight + 'px;') + ('padding: 10px ' + settingsPadding + '%;') + '}',
+
+        /*****----------------------------------------------------------------------------\
+          Mark Settings
+        \----------------------------------------------------------------------------*****/
+
+        '.ct-component--right {' + ('width: ' + settingsWidth + '%;') + ('height: ' + chartHeight + 'px;') + 'float: right;' + '}', '.ct-component--right .ct-component__textarea {' + 'height: 100%;' + '}',
+
+        /*****----------------------------------------------------------------------------\
+          X-axis Settings
+        \----------------------------------------------------------------------------*****/
+
+        '.ct-component--bottom {' + ('width: ' + settingsWidth + '%;') + ('margin-right: ' + (settingsWidth + settingsMargin) + '%;') + ('margin-left: ' + (settingsWidth + settingsMargin) + '%;') + '}', '.ct-component--bottom .ct-component__textarea {' + '}',
+
+        /***--------------------------------------------------------------------------------------\
+          Callback
+        \--------------------------------------------------------------------------------------***/
+
+        '.ct-callbacks {' + '}', '.ct-callbacks > .ct-component {' + ('width: ' + callbackWidth + '%;') + '}', '.ct-callbacks > .ct-component:not(.ct-destroy) {' + ('margin-right: ' + callbackMargin + '%;') + '}', '.ct-component--callback .ct-component__textarea {' + 'height: 250px;' + '}'];
+
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = styles.join('\n');
+        document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
+    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
 
     var slicedToArray = function () {
       function sliceIterator(arr, i) {
@@ -188,6 +262,40 @@
         });
     }
 
+    function clone(obj) {
+        var copy = void 0;
+
+        //boolean, number, string, null, undefined
+        if ('object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) || null == obj) return obj;
+
+        //date
+        if (obj instanceof Date) {
+            copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+
+        //array
+        if (obj instanceof Array) {
+            copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = clone(obj[i]);
+            }
+            return copy;
+        }
+
+        //object
+        if (obj instanceof Object) {
+            copy = {};
+            for (var attr in obj) {
+                if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+            }
+            return copy;
+        }
+
+        throw new Error('Unable to copy [obj]! Its type is not supported.');
+    }
+
     function callbacks() {
         var context = this;
 
@@ -205,8 +313,25 @@
                 });
 
                 if (['init', 'layout', 'destroy'].indexOf(d.label) < 0) context.chart.draw();else {
+                    console.log('reinitialized');
                     context.chart.destroy();
-                    context.chart = webCharts.createChart(context.containers.chart.node(), context.settings.chart).init(context.data);
+                    context.chart = webCharts.createChart(context.containers.chart.node(), context.settings.chart);
+
+                    var _loop = function _loop(callback) {
+                        context.chart.on(callback, function () {
+                            try {
+                                eval(context.callbacks[callback]);
+                            } catch (error) {
+                                alert("That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key.");
+                                console.error(error);
+                            }
+                        });
+                    };
+
+                    for (var callback in context.callbacks) {
+                        _loop(callback);
+                    }
+                    context.chart.init(clone(context.data));
                 }
             });
         });
@@ -223,7 +348,7 @@
 
     function init(data) {
         this.data = data;
-        this.chart.init(data);
+        this.chart.init(clone(data));
     }
 
     function configTester(element, settings) {
@@ -259,6 +384,7 @@
         };
 
         layout.call(configTester);
+        styles.call(configTester);
         eventListeners.call(configTester);
         createChart.call(configTester);
 

@@ -178,6 +178,7 @@ function initTestSuite(version,path){
     var location = version.slice(0,3) === '../' ? version : path + version
     var root = location + '/test';
     var rendererPath = location + '/build/webcharts.js';
+    console.log(location);
 
     var link = document.createElement('link');
     link.href =location + '/css/webcharts.css'

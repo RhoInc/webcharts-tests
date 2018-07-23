@@ -1,11 +1,15 @@
 export default function layout() {
     const context = this;
+    const codeMirrorSettings = {
+        mode: 'javascript',
+        lineNumbers: true,
+    };
 
     this.containers.chartFramework = this.containers.main
         .append('div')
         .classed('ct-row ct-row--top ct-chart-framework', true);
 
-        this.containers.chartFramework.append('h1').text('Chart Framework');
+        this.containers.chartFramework.append('h1').classed('ct-row__header', true).text('Chart Framework');
 
         this.containers.chartFramework
             .selectAll('div.ct-component')
@@ -38,7 +42,7 @@ export default function layout() {
                             .split(' ')
                             .map((d,i) => i === 0 ? d : d.substring(0,1).toUpperCase() + d.substring(1))
                             .join('');
-                        d.setting = d.label.replace('-', ' ').split(' ')[0].toLowerCase();
+                        d.setting = d.label.replace('-', ' ').replace('Mark', 'Marks').split(' ')[0].toLowerCase();
 
                         return d;
                     })
@@ -62,18 +66,21 @@ export default function layout() {
                         .append('h3')
                         .classed('ct-component__header', true)
                         .text(d.label);
-                    component
+                    const settings = JSON.stringify(context.settings[d.setting], null, 4);
+                    const textarea = component
                         .append('textarea')
                         .classed('ct-component__textarea', true)
-                        .html(JSON.stringify(context.settings[d.setting], null, 4));
+                        .attr('rows', settings.split('\n').length)
+                        .html(settings);
+                    //CodeMirror.fromTextArea(textarea.node(), codeMirrorSettings);
                 }
             });
 
     this.containers.callbacksContainer = this.containers.main
         .append('div')
-        .classed('ct-row ct-row--bottom callbacks', true);
+        .classed('ct-row ct-row--bottom ct-callbacks', true);
 
-        this.containers.callbacksContainer.append('h1').text('Callbacks');
+        this.containers.callbacksContainer.append('h1').classed('ct-row__header', true).text('Callbacks');
 
         this.containers.callbacksContainer
             .selectAll('div.ct-component')
@@ -124,12 +131,13 @@ export default function layout() {
                 component.append('h3')
                     .classed('ct-component__header', true)
                     .text(d.label);
+                const textarea = component
+                    .append('textarea')
+                    .classed('ct-component__textarea', true);
+                //CodeMirror.fromTextArea(textarea.node(), codeMirrorSettings);
                 component
                     .append('small')
                     .classed('ct-component__description', true)
                     .text(d.description);
-                component
-                    .append('textarea')
-                    .classed('ct-component__textarea', true);
             });
 }

@@ -37,3 +37,22 @@ d3.csv(
         configTester('#container', settings).init(data);
     }
 );
+const root = 'https://rawgit.com/RhoInc/Webcharts/master/test/samples/chart-config/';
+d3.json(
+    `${root}/testSettingList.json`,
+    testSettingGroups => {
+        const allSettings = [];
+
+        testSettingGroups.forEach(testSettingGroup => {
+            d3.json(
+                `${root}/${testSettingGroup.filename}`,
+                settingsList => {
+                    settingsList.forEach(settings => {
+                        console.log(settings);
+                        allSettings.push(settings);
+                    });
+                }
+            );
+        });
+    }
+);
