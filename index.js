@@ -154,6 +154,7 @@ function drawCharts(path, root, type){
 
         //load the data and render the chart
         dataPaths.forEach(function(file) {
+            console.log(file.path);
             d3.csv(file.path, function(error, data) {
                 file.raw = data;
 
