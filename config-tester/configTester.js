@@ -229,7 +229,7 @@
       };
     }();
 
-    function settings() {
+    function settings$1() {
         var context = this;
 
         this.containers.settings.forEach(function (container) {
@@ -363,12 +363,8 @@
     }
 
     function eventListeners() {
-        settings.call(this);
+        settings$1.call(this);
         callbacks.call(this);
-    }
-
-    function createChart() {
-        this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
     }
 
     function loadSettings() {
@@ -391,6 +387,23 @@
         });
     }
 
+    function callback() {
+        this.configTester.containers.controls.data.selectAll('option').data(dataFiles).enter().append('option').text(function (d) {
+            return d.rel_path;
+        });
+    }
+
+    function loadData() {
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.js';
+        script.configTester = this;
+        script.onreadystatechange = callback;
+        script.onload = callback;
+        head.appendChild(script);
+    }
+
     function loadBranches() {
         var context = this;
         var xhttp = new XMLHttpRequest();
@@ -410,6 +423,20 @@
         xhttp.send();
     }
 
+    function prepareChart() {
+        this.settings.chart = this.configurations[0];
+        this.settings.general = Object.keys(this.settings.chart).filter(function (key) {
+            return ['x', 'y', 'marks'].indexOf(key) < 0;
+        }).reduce(function (acc, cur) {
+            acc[cur] = settings[cur];
+            return acc;
+        }, {});
+        this.settings.y = this.settings.chart.y;
+        this.settings.marks = this.settings.chart.marks;
+        this.settings.x = this.settings.chart.x;
+        this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
+    }
+
     function updateSettings() {
         var _this = this;
 
@@ -420,28 +447,37 @@
         });
     }
 
-    function init(data) {
-        this.data = data;
-        loadSettings.call(this);
-        loadBranches.call(this);
-        updateSettings.call(this);
-        this.chart.init(clone(data));
+    function init() {
+        var context = this;
+        var promise = new Promise(function (resolve, reject) {
+            loadSettings.call(context);
+            loadData.call(context);
+            loadBranches.call(context);
+            resolve(context);
+            return context;
+        }).then(function (configTester) {
+            prepareChart.call(configTester);
+            return configTester;
+        }).then(function (configTester) {
+            updateSettings.call(configTester);
+            return configTester;
+        }).then(function (configTester) {
+            context.chart.init(clone(context.data));
+            return configTester;
+        }).catch(function (configTester) {
+            console.log(configTester);
+        });
     }
 
-    function configTester(element, settings) {
+    function configTester(element) {
         var configTester = {
             element: element,
             settings: {
-                chart: settings,
-                general: Object.keys(settings).filter(function (key) {
-                    return ['x', 'y', 'marks'].indexOf(key) < 0;
-                }).reduce(function (acc, cur) {
-                    acc[cur] = settings[cur];
-                    return acc;
-                }, {}),
-                y: settings.y,
-                marks: settings.marks,
-                x: settings.x
+                chart: null,
+                general: null,
+                y: null,
+                marks: null,
+                x: null
             },
             callbacks: {
                 init: null,
@@ -467,7 +503,6 @@
         layout.call(configTester);
         styles.call(configTester);
         eventListeners.call(configTester);
-        createChart.call(configTester);
 
         return configTester;
     }

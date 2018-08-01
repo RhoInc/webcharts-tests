@@ -1,4 +1,5 @@
 import clone from '../util/clone';
+
 export default function callbacks() {
     const context = this;
 

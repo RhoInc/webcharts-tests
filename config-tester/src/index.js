@@ -1,26 +1,17 @@
 import layout from './layout';
 import styles from './styles';
 import eventListeners from './eventListeners';
-import createChart from './createChart';
 import init from './init';
 
-export default function configTester(element, settings) {
+export default function configTester(element) {
     const configTester = {
         element,
         settings: {
-            chart: settings,
-            general: Object.keys(settings)
-                .filter(key => ['x', 'y', 'marks'].indexOf(key) < 0)
-                .reduce(
-                    (acc, cur) => {
-                        acc[cur] = settings[cur];
-                        return acc;
-                    },
-                    {}
-                ),
-            y: settings.y,
-            marks: settings.marks,
-            x: settings.x,
+            chart: null,
+            general: null,
+            y: null,
+            marks: null,
+            x: null,
         },
         callbacks: {
             init: null,
@@ -49,7 +40,6 @@ export default function configTester(element, settings) {
     layout.call(configTester);
     styles.call(configTester);
     eventListeners.call(configTester);
-    createChart.call(configTester);
 
     return configTester;
 }
