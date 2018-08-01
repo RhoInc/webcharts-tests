@@ -62,7 +62,6 @@ d3.json(`${root}/testSettingList.json`, function(testSettingGroups) {
         if (!/^Sizing|Tables/.test(testSettingGroup.label)) {
             d3.json(`${root}/${testSettingGroup.filename}`, function(settingsList) {
                 settingsList.forEach(function(settings) {
-                    console.log(settings);
                     if (settings.settings.hasOwnProperty('marks')) {
                         allSettings.push(settings);
                         configurations

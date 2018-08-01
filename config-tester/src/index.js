@@ -36,10 +36,14 @@ export default function configTester(element, settings) {
                 .append('div')
                 .classed('config-tester', true)
                 .attr('id', `config-tester${d3.selectAll('.config-tester').size() + 1}`),
+            controls: {},
             settings: [],
             callbacks: [],
         },
         init,
+        configurations: [],
+        datasets: [],
+        branches: [],
     };
 
     layout.call(configTester);

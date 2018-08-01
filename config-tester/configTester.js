@@ -7,7 +7,31 @@
     function layout() {
         var context = this;
 
-        this.containers.chartFramework = this.containers.main.append('div').classed('ct-row ct-row--top ct-chart-framework', true);
+        /**-------------------------------------------------------------------------------------------\
+        Configuration
+        \-------------------------------------------------------------------------------------------**/
+
+        this.containers.configuration = this.containers.main.append('div').classed('ct-row ct-row--top ct-configuration', true);
+
+        this.containers.configuration.append('h1').classed('ct-row__header', true).text('Configuration');
+
+        this.containers.settingsControl = this.containers.configuration.append('div').classed('ct-control ct-control--settings', true);
+        this.containers.controls.settings = this.containers.settingsControl.append('select').classed('ct-control__select', true);
+        this.containers.settingsControl.append('span').classed('ct-control__label', true).text('Chart Configuration');
+
+        this.containers.dataControl = this.containers.configuration.append('div').classed('ct-control ct-control--data', true);
+        this.containers.controls.data = this.containers.dataControl.append('select').classed('ct-control__select', true);
+        this.containers.dataControl.append('span').classed('ct-control__label', true).text('Data');
+
+        this.containers.branchesControl = this.containers.configuration.append('div').classed('ct-control ct-control--branches', true);
+        this.containers.controls.branches = this.containers.branchesControl.append('select').classed('ct-control__select', true);
+        this.containers.branchesControl.append('span').classed('ct-control__label', true).text('Webcharts Branch');
+
+        /**-------------------------------------------------------------------------------------------\
+        Chart framework
+        \-------------------------------------------------------------------------------------------**/
+
+        this.containers.chartFramework = this.containers.main.append('div').classed('ct-row ct-row--middle ct-chart-framework', true);
 
         this.containers.chartFramework.append('h1').classed('ct-row__header', true).text('Chart Framework');
 
@@ -44,12 +68,14 @@
 
             //Add header and input.
             if (d.location !== 'middle') {
-                component.append('h3').classed('ct-component__header', true).text(d.label);
-                var settings = JSON.stringify(context.settings[d.setting], null, 4);
-                var textarea = component.append('textarea').classed('ct-component__textarea', true).attr('rows', settings.split('\n').length).html(settings);
-                //CodeMirror.fromTextArea(textarea.node(), codeMirrorSettings);
+                context.containers[d.property + 'Header'] = component.append('h3').classed('ct-component__header', true).text(d.label);
+                context.containers[d.property + 'Textarea'] = component.append('textarea').classed('ct-component__textarea', true);
             }
         });
+
+        /**-------------------------------------------------------------------------------------------\
+        Callbacks
+        \-------------------------------------------------------------------------------------------**/
 
         this.containers.callbacksContainer = this.containers.main.append('div').classed('ct-row ct-row--bottom ct-callbacks', true);
 
@@ -87,11 +113,10 @@
             d.container = component;
             context.containers.callbacks.push(component);
 
-            //Add header, description, and input.
-            component.append('h3').classed('ct-component__header', true).text(d.label);
-            var textarea = component.append('textarea').classed('ct-component__textarea', true);
-            //CodeMirror.fromTextArea(textarea.node(), codeMirrorSettings);
-            component.append('small').classed('ct-component__description', true).text(d.description);
+            //Add header, input, and description.
+            context.containers[d.label + 'Header'] = component.append('h3').classed('ct-component__header', true).text(d.label);
+            context.containers[d.label + 'Textarea'] = component.append('textarea').classed('ct-component__textarea', true);
+            context.containers[d.label + 'Description'] = component.append('small').classed('ct-component__description', true).text(d.description);
         });
     }
 
@@ -346,8 +371,60 @@
         this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
     }
 
+    function loadSettings() {
+        var _this = this;
+
+        var root = 'https://rawgit.com/RhoInc/Webcharts/master/test/samples/chart-config/';
+        d3.json(root + '/testSettingList.json', function (testSettingGroups) {
+            testSettingGroups.forEach(function (testSettingGroup) {
+                if (!/^Sizing|Tables/.test(testSettingGroup.label)) {
+                    d3.json(root + '/' + testSettingGroup.filename, function (settingsList) {
+                        settingsList.forEach(function (settings) {
+                            if (settings.settings.hasOwnProperty('marks')) {
+                                _this.configurations.push(settings);
+                                _this.containers.controls.settings.append('option').datum(settings).text(settings.label);
+                            }
+                        });
+                    });
+                }
+            });
+        });
+    }
+
+    function loadBranches() {
+        var context = this;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var branches = JSON.parse(this.responseText).sort(function (a, b) {
+                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
+                });
+                context.containers.controls.branches.selectAll('option').data(branches, function (d) {
+                    return d.commit.sha;
+                }).enter().append('option').text(function (d) {
+                    return d.name;
+                });
+            }
+        };
+        xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
+        xhttp.send();
+    }
+
+    function updateSettings() {
+        var _this = this;
+
+        this.containers.settings.forEach(function (container) {
+            var d = container.datum();
+            var json = JSON.stringify(_this.settings[d.setting], null, 4);
+            container.select('textarea').text(JSON.stringify(_this.settings[d.setting], null, 4)).attr('rows', ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null);
+        });
+    }
+
     function init(data) {
         this.data = data;
+        loadSettings.call(this);
+        loadBranches.call(this);
+        updateSettings.call(this);
         this.chart.init(clone(data));
     }
 
@@ -377,10 +454,14 @@
             },
             containers: {
                 main: d3.select(element).append('div').classed('config-tester', true).attr('id', 'config-tester' + (d3.selectAll('.config-tester').size() + 1)),
+                controls: {},
                 settings: [],
                 callbacks: []
             },
-            init: init
+            init: init,
+            configurations: [],
+            datasets: [],
+            branches: []
         };
 
         layout.call(configTester);
