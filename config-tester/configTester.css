@@ -12,6 +12,10 @@
 
     .ct-configuration {
     }
+    .ct-control__select {
+        width: 10%;
+        margin-right: 5px;
+    }
 
 /*------------------------------------------------------------------------------------------------\
   Chart framework

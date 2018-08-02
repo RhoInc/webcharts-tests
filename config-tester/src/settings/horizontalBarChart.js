@@ -1,5 +1,6 @@
 export default function horizontalBarChart() {
     return {
+        data: './data/iris.csv',
         x: {
             type: 'linear',
             column: 'sepal width',

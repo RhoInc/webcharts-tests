@@ -367,60 +367,33 @@
         callbacks.call(this);
     }
 
-    function loadSettings() {
-        var _this = this;
-
-        var root = 'https://rawgit.com/RhoInc/Webcharts/master/test/samples/chart-config/';
-        d3.json(root + '/testSettingList.json', function (testSettingGroups) {
-            testSettingGroups.forEach(function (testSettingGroup) {
-                if (!/^Sizing|Tables/.test(testSettingGroup.label)) {
-                    d3.json(root + '/' + testSettingGroup.filename, function (settingsList) {
-                        settingsList.forEach(function (settings) {
-                            if (settings.settings.hasOwnProperty('marks')) {
-                                _this.configurations.push(settings);
-                                _this.containers.controls.settings.append('option').datum(settings).text(settings.label);
-                            }
-                        });
-                    });
-                }
-            });
-        });
-    }
-
-    function callback() {
-        this.configTester.containers.controls.data.selectAll('option').data(dataFiles).enter().append('option').text(function (d) {
-            return d.rel_path;
-        });
-    }
-
     function loadData() {
-        var head = document.getElementsByTagName('head')[0];
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = 'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.js';
-        script.configTester = this;
-        script.onreadystatechange = callback;
-        script.onload = callback;
-        head.appendChild(script);
+        return new Promise(function (resolve, reject) {
+            var req = new XMLHttpRequest();
+            req.open('GET', 'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json', true);
+            req.onload = function () {
+                if (req.status == 200) resolve(JSON.parse(req.responseText).sort(function (a, b) {
+                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
+                }));else reject(Error(this.statusText));
+            };
+            req.onerror = function () {
+                reject(Error('Network Error'));
+            };
+            req.send();
+        });
     }
 
     function loadBranches() {
-        var context = this;
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                var branches = JSON.parse(this.responseText).sort(function (a, b) {
+        return new Promise(function (resolve, reject) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) resolve(JSON.parse(this.responseText).sort(function (a, b) {
                     return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
-                });
-                context.containers.controls.branches.selectAll('option').data(branches, function (d) {
-                    return d.commit.sha;
-                }).enter().append('option').text(function (d) {
-                    return d.name;
-                });
-            }
-        };
-        xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
-        xhttp.send();
+                }));
+            };
+            xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
+            xhttp.send();
+        });
     }
 
     function prepareChart() {
@@ -437,39 +410,37 @@
         this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
     }
 
-    function updateSettings() {
-        var _this = this;
-
-        this.containers.settings.forEach(function (container) {
-            var d = container.datum();
-            var json = JSON.stringify(_this.settings[d.setting], null, 4);
-            container.select('textarea').text(JSON.stringify(_this.settings[d.setting], null, 4)).attr('rows', ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null);
-        });
-    }
-
     function init() {
         var context = this;
-        var promise = new Promise(function (resolve, reject) {
-            loadSettings.call(context);
-            loadData.call(context);
-            loadBranches.call(context);
-            resolve(context);
-            return context;
-        }).then(function (configTester) {
-            prepareChart.call(configTester);
-            return configTester;
-        }).then(function (configTester) {
-            updateSettings.call(configTester);
-            return configTester;
-        }).then(function (configTester) {
-            context.chart.init(clone(context.data));
-            return configTester;
-        }).catch(function (configTester) {
-            console.log(configTester);
+
+        //Add viz-library data to data dropdown.
+        loadData.call(this).then(function (data) {
+            console.log(data);
+            context.containers.controls.data.selectAll('option').data(data).enter().append('option').text(function (d) {
+                return d.rel_path;
+            });
+
+            return data;
         });
+
+        //Add Webcharts branches to branch dropdown.
+        loadBranches.call(this).then(function (branches) {
+            console.log(branches);
+            context.containers.controls.branches.selectAll('option').data(branches, function (d) {
+                return d.commit.sha;
+            }).enter().append('option').text(function (d) {
+                return d.name;
+            });
+
+            return branches;
+        });
+
+        prepareChart.call(configTester);
+        //updateSettings.call(configTester);
+        //context.chart.init(clone(context.data));
     }
 
-    function configTester(element) {
+    function configTester$1(element) {
         var configTester = {
             element: element,
             settings: {
@@ -507,6 +478,6 @@
         return configTester;
     }
 
-    return configTester;
+    return configTester$1;
 
 })));
