@@ -1,10 +1,10 @@
 export default function prepareChart() {
-    this.settings.chart = this.configurations[0];
+    this.settings.chart = this.chartConfiguration;
     this.settings.general = Object.keys(this.settings.chart)
-        .filter(key => ['x', 'y', 'marks'].indexOf(key) < 0)
+        .filter(key => ['data', 'x', 'y', 'marks'].indexOf(key) < 0)
         .reduce(
             (acc,cur) => {
-                acc[cur] = settings[cur];
+                acc[cur] = this.settings.chart[cur];
                 return acc;
             },
             {}
@@ -17,4 +17,5 @@ export default function prepareChart() {
             this.containers.chart.node(),
             this.settings.chart
         );
+    console.log(this.chart);
 }

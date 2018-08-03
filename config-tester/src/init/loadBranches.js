@@ -1,4 +1,6 @@
 export default function loadBranches() {
+    const context = this;
+
     return new Promise(function(resolve,reject) {
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {

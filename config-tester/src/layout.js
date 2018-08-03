@@ -11,17 +11,6 @@ export default function layout() {
 
             this.containers.configuration.append('h1').classed('ct-row__header', true).text('Configuration');
 
-            //this.containers.settingsControl = this.containers.configuration
-            //    .append('div')
-            //    .classed('ct-control ct-control--settings', true);
-            //    this.containers.controls.settings = this.containers.settingsControl
-            //        .append('select')
-            //        .classed('ct-control__select', true);
-            //    this.containers.settingsControl
-            //        .append('span')
-            //        .classed('ct-control__label', true)
-            //        .text('Chart Configuration');
-
             this.containers.buttons = this.containers.configuration
                 .append('div')
                 .classed('ct-control-div ct-control-div--buttons', true);
@@ -36,6 +25,17 @@ export default function layout() {
             this.containers.dropdowns = this.containers.configuration
                 .append('div')
                 .classed('ct-control-div ct-control-div--dropdowns', true);
+
+                this.containers.settingsControl = this.containers.dropdowns
+                    .append('div')
+                    .classed('ct-control ct-control--settings', true);
+                    this.containers.controls.settings = this.containers.settingsControl
+                        .append('select')
+                        .classed('ct-control__select', true);
+                    this.containers.settingsControl
+                        .append('span')
+                        .classed('ct-control__label', true)
+                        .text('Chart Configuration');
 
                 this.containers.dataControl = this.containers.dropdowns
                     .append('div')

@@ -1,16 +1,30 @@
+import loadChartConfigurations from './init/loadChartConfigurations';
 import loadData from './init/loadData';
 import loadBranches from './init/loadBranches';
-import prepareChart from './init/prepareChart';
-import updateSettings from './init/updateSettings';
-import clone from './util/clone';
 
 export default function init() {
     const context = this;
 
     //Add viz-library data to data dropdown.
+    loadChartConfigurations.call(this)
+        .then(function(chartConfigurations) {
+            console.log(chartConfigurations);
+            context.chartConfigurations = chartConfigurations;
+            context.containers.controls.settings
+                .selectAll('option')
+                    .data(chartConfigurations, d => d.type)
+                    .enter()
+                .append('option')
+                .text(d => d.type);
+
+            return chartConfigurations;
+        });
+
+    //Add viz-library data to data dropdown.
     loadData.call(this)
         .then(function(data) {
             console.log(data);
+            context.data = data;
             context.containers.controls.data
                 .selectAll('option')
                     .data(data)
@@ -25,6 +39,7 @@ export default function init() {
     loadBranches.call(this)
         .then(function(branches) {
             console.log(branches);
+            context.branches = branches;
             context.containers.controls.branches
                 .selectAll('option')
                     .data(branches, d => d.commit.sha)
@@ -34,8 +49,4 @@ export default function init() {
 
             return branches;
         });
-
-    prepareChart.call(configTester);
-    //updateSettings.call(configTester);
-    //context.chart.init(clone(context.data));
 }

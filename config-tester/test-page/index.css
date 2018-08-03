@@ -18,3 +18,8 @@
     font-size: 24px;
     font-weight: lighter;
 }
+#container {
+    width: 96%;
+    margin: 12px 2%;
+    display: inline-block;
+}

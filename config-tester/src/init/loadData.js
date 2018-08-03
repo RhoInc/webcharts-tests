@@ -1,4 +1,6 @@
 export default function loadData() {
+    const context = this;
+
     return new Promise(function(resolve,reject) {
         const req = new XMLHttpRequest();
         req.open('GET', 'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json', true);

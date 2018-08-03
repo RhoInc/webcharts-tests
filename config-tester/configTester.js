@@ -4,6 +4,225 @@
     (global.configTester = factory());
 }(this, (function () { 'use strict';
 
+    function horizontalBarChart() {
+        return {
+            data: './data/iris.csv',
+            x: {
+                type: 'linear',
+                column: 'sepal width',
+                label: 'Sepal Width'
+            },
+            y: {
+                type: 'ordinal',
+                column: 'species',
+                label: 'Species'
+            },
+            marks: [{
+                type: 'bar',
+                per: ['species'],
+                tooltip: '[species]: $y',
+                attributes: {
+                    stroke: 'black'
+                },
+                summarizeX: 'mean'
+            }],
+            color_by: 'species',
+            color_dom: null,
+            legend: {
+                label: 'Species',
+                location: 'top'
+            },
+            resizable: false
+        };
+    }
+
+    function scatterPlot() {
+        return {
+            data: './data/iris.csv',
+            x: {
+                type: 'linear',
+                column: 'sepal width',
+                label: 'Sepal Width'
+            },
+            y: {
+                type: 'linear',
+                column: 'sepal length',
+                label: 'Sepal Length'
+            },
+            marks: [{
+                type: 'circle',
+                per: ['species', 'sepal width', 'sepal length'],
+                tooltip: '[species]: $x/$y',
+                attributes: {
+                    stroke: 'black'
+                }
+            }],
+            color_by: 'species',
+            color_dom: null,
+            legend: {
+                label: 'Species',
+                location: 'top'
+            },
+            resizable: false
+        };
+    }
+
+    function timeSeriesPlot() {
+        return {
+            data: './data/climate_data.csv',
+            x: {
+                type: 'time',
+                column: 'DATE',
+                label: 'Date'
+            },
+            y: {
+                type: 'linear',
+                column: 'Monthly Mean',
+                label: 'Mean Temperature?'
+            },
+            marks: [{
+                type: 'line',
+                per: ['STATION_NAME'],
+                summarizeY: 'mean'
+            }, {
+                type: 'circle',
+                per: ['STATION_NAME', 'DATE'],
+                summarizeY: 'mean'
+            }],
+            color_by: 'STATION_NAME',
+            color_dom: null,
+            legend: {
+                label: 'Measurement Location',
+                location: 'top'
+            },
+            resizable: false
+        };
+    }
+
+    function verticalBarChart() {
+        return {
+            data: './data/iris.csv',
+            x: {
+                type: 'ordinal',
+                column: 'species',
+                label: 'Species'
+            },
+            y: {
+                type: 'linear',
+                column: 'sepal width',
+                label: 'Sepal Width'
+            },
+            marks: [{
+                type: 'bar',
+                per: ['species'],
+                tooltip: '[species]: $y',
+                attributes: {
+                    stroke: 'black'
+                },
+                summarizeY: 'mean'
+            }],
+            color_by: 'species',
+            color_dom: null,
+            legend: {
+                label: 'Species',
+                location: 'top'
+            },
+            resizable: false
+        };
+    }
+
+    var chartConfigurations = {
+        horizontalBarChart: horizontalBarChart,
+        scatterPlot: scatterPlot,
+        timeSeriesPlot: timeSeriesPlot,
+        verticalBarChart: verticalBarChart
+    };
+
+    function loadChartConfigurations() {
+
+        return new Promise(function (resolve, reject) {
+            resolve(Object.keys(chartConfigurations).map(function (key) {
+                var chartConfiguration = chartConfigurations[key]();
+                chartConfiguration.type = key.replace(/([A-Z])/g, ' $1').toLowerCase();
+                chartConfiguration.type;
+
+                return chartConfiguration;
+            }));
+        });
+    }
+
+    function loadData() {
+
+        return new Promise(function (resolve, reject) {
+            var req = new XMLHttpRequest();
+            req.open('GET', 'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json', true);
+            req.onload = function () {
+                if (req.status == 200) resolve(JSON.parse(req.responseText).sort(function (a, b) {
+                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
+                }));else reject(Error(this.statusText));
+            };
+            req.onerror = function () {
+                reject(Error('Network Error'));
+            };
+            req.send();
+        });
+    }
+
+    function loadBranches() {
+
+        return new Promise(function (resolve, reject) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) resolve(JSON.parse(this.responseText).sort(function (a, b) {
+                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
+                }));
+            };
+            xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
+            xhttp.send();
+        });
+    }
+
+    function init() {
+        var context = this;
+
+        //Add viz-library data to data dropdown.
+        loadChartConfigurations.call(this).then(function (chartConfigurations) {
+            console.log(chartConfigurations);
+            context.chartConfigurations = chartConfigurations;
+            context.containers.controls.settings.selectAll('option').data(chartConfigurations, function (d) {
+                return d.type;
+            }).enter().append('option').text(function (d) {
+                return d.type;
+            });
+
+            return chartConfigurations;
+        });
+
+        //Add viz-library data to data dropdown.
+        loadData.call(this).then(function (data) {
+            console.log(data);
+            context.data = data;
+            context.containers.controls.data.selectAll('option').data(data).enter().append('option').text(function (d) {
+                return d.rel_path;
+            });
+
+            return data;
+        });
+
+        //Add Webcharts branches to branch dropdown.
+        loadBranches.call(this).then(function (branches) {
+            console.log(branches);
+            context.branches = branches;
+            context.containers.controls.branches.selectAll('option').data(branches, function (d) {
+                return d.commit.sha;
+            }).enter().append('option').text(function (d) {
+                return d.name;
+            });
+
+            return branches;
+        });
+    }
+
     function layout() {
         var context = this;
 
@@ -15,22 +234,15 @@
 
         this.containers.configuration.append('h1').classed('ct-row__header', true).text('Configuration');
 
-        //this.containers.settingsControl = this.containers.configuration
-        //    .append('div')
-        //    .classed('ct-control ct-control--settings', true);
-        //    this.containers.controls.settings = this.containers.settingsControl
-        //        .append('select')
-        //        .classed('ct-control__select', true);
-        //    this.containers.settingsControl
-        //        .append('span')
-        //        .classed('ct-control__label', true)
-        //        .text('Chart Configuration');
-
         this.containers.buttons = this.containers.configuration.append('div').classed('ct-control-div ct-control-div--buttons', true);
         this.containers.renderControl = this.containers.buttons.append('div').classed('ct-control ct-control--render', true);
         this.containers.controls.render = this.containers.renderControl.append('button').classed('ct-control__button', true).text('Render Chart');
 
         this.containers.dropdowns = this.containers.configuration.append('div').classed('ct-control-div ct-control-div--dropdowns', true);
+
+        this.containers.settingsControl = this.containers.dropdowns.append('div').classed('ct-control ct-control--settings', true);
+        this.containers.controls.settings = this.containers.settingsControl.append('select').classed('ct-control__select', true);
+        this.containers.settingsControl.append('span').classed('ct-control__label', true).text('Chart Configuration');
 
         this.containers.dataControl = this.containers.dropdowns.append('div').classed('ct-control ct-control--data', true);
         this.containers.controls.data = this.containers.dataControl.append('select').classed('ct-control__select', true);
@@ -198,6 +410,69 @@
         document.getElementsByTagName('head')[0].appendChild(style);
     }
 
+    function getConfiguration() {
+        var _this = this;
+
+        this.chartConfiguration = this.containers.controls.settings.select('option:checked').datum();
+        console.log(this.chartConfiguration);
+        this.dataFile = this.chartConfiguration.data;
+        this.containers.controls.data.selectAll('option').property('selected', function (d) {
+            return d.rel_path === _this.dataFile;
+        });
+        console.log(this.dataFile);
+        this.branch = this.containers.controls.branches.select('option:checked').datum();
+        console.log(this.branch);
+    }
+
+    function prepareChart() {
+        var _this = this;
+
+        this.settings.chart = this.chartConfiguration;
+        this.settings.general = Object.keys(this.settings.chart).filter(function (key) {
+            return ['data', 'x', 'y', 'marks'].indexOf(key) < 0;
+        }).reduce(function (acc, cur) {
+            acc[cur] = _this.settings.chart[cur];
+            return acc;
+        }, {});
+        this.settings.y = this.settings.chart.y;
+        this.settings.marks = this.settings.chart.marks;
+        this.settings.x = this.settings.chart.x;
+        this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
+        console.log(this.chart);
+    }
+
+    function updateSettings() {
+        var _this = this;
+
+        this.containers.settings.forEach(function (container) {
+            var d = container.datum();
+            var json = JSON.stringify(_this.settings[d.setting], null, 4);
+            container.select('textarea').text(JSON.stringify(_this.settings[d.setting], null, 4)).attr('rows', ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null);
+        });
+    }
+
+    function initChart() {
+        var _this = this;
+
+        d3.csv(this.dataPath + "/" + this.dataFile, function (d) {
+            return d;
+        }, function (data) {
+            _this.data = data;
+            _this.chart.init(data);
+        });
+    }
+
+    function renderChart() {
+        var _this = this;
+
+        this.containers.controls.render.on('click', function () {
+            getConfiguration.call(_this);
+            prepareChart.call(_this);
+            updateSettings.call(_this);
+            initChart.call(_this);
+        });
+    }
+
     var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
       return typeof obj;
     } : function (obj) {
@@ -242,7 +517,7 @@
       };
     }();
 
-    function settings$1() {
+    function settings() {
         var context = this;
 
         this.containers.settings.forEach(function (container) {
@@ -376,93 +651,38 @@
     }
 
     function eventListeners() {
-        settings$1.call(this);
+        renderChart.call(this);
+        settings.call(this);
         callbacks.call(this);
     }
 
-    function loadData() {
-        return new Promise(function (resolve, reject) {
-            var req = new XMLHttpRequest();
-            req.open('GET', 'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json', true);
-            req.onload = function () {
-                if (req.status == 200) resolve(JSON.parse(req.responseText).sort(function (a, b) {
-                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
-                }));else reject(Error(this.statusText));
-            };
-            req.onerror = function () {
-                reject(Error('Network Error'));
-            };
-            req.send();
-        });
-    }
+    function configTester(element) {
+        var dataPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'https://cdn.rawgit.com/RhoInc/viz-library/master';
 
-    function loadBranches() {
-        return new Promise(function (resolve, reject) {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) resolve(JSON.parse(this.responseText).sort(function (a, b) {
-                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
-                }));
-            };
-            xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
-            xhttp.send();
-        });
-    }
-
-    function prepareChart() {
-        this.settings.chart = this.configurations[0];
-        this.settings.general = Object.keys(this.settings.chart).filter(function (key) {
-            return ['x', 'y', 'marks'].indexOf(key) < 0;
-        }).reduce(function (acc, cur) {
-            acc[cur] = settings[cur];
-            return acc;
-        }, {});
-        this.settings.y = this.settings.chart.y;
-        this.settings.marks = this.settings.chart.marks;
-        this.settings.x = this.settings.chart.x;
-        this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
-    }
-
-    function init() {
-        var context = this;
-
-        //Add viz-library data to data dropdown.
-        loadData.call(this).then(function (data) {
-            console.log(data);
-            context.containers.controls.data.selectAll('option').data(data).enter().append('option').text(function (d) {
-                return d.rel_path;
-            });
-
-            return data;
-        });
-
-        //Add Webcharts branches to branch dropdown.
-        loadBranches.call(this).then(function (branches) {
-            console.log(branches);
-            context.containers.controls.branches.selectAll('option').data(branches, function (d) {
-                return d.commit.sha;
-            }).enter().append('option').text(function (d) {
-                return d.name;
-            });
-
-            return branches;
-        });
-
-        prepareChart.call(configTester);
-        //updateSettings.call(configTester);
-        //context.chart.init(clone(context.data));
-    }
-
-    function configTester$1(element) {
         var configTester = {
+            init: init,
             element: element,
+            dataPath: dataPath,
+
+            //Containers is an object whose properties represent d3 selections of elements in the DOM.
+            containers: {
+                main: d3.select(element).append('div').classed('config-tester', true).attr('id', 'config-tester' + (d3.selectAll('.config-tester').size() + 1)),
+                controls: {},
+                settings: [],
+                callbacks: []
+            },
+
+            //Settings is an object whose properties populate the settings inputs.
             settings: {
+                data: null,
                 chart: null,
                 general: null,
                 y: null,
                 marks: null,
                 x: null
             },
+
+            //Callbacks is an object whose methods become chart callbacks.
             callbacks: {
                 init: null,
                 layout: null,
@@ -472,16 +692,12 @@
                 resize: null,
                 destroy: null
             },
-            containers: {
-                main: d3.select(element).append('div').classed('config-tester', true).attr('id', 'config-tester' + (d3.selectAll('.config-tester').size() + 1)),
-                controls: {},
-                settings: [],
-                callbacks: []
-            },
-            init: init,
-            configurations: [],
-            datasets: [],
-            branches: []
+
+            //These properties represent data that populate the config-tester configuration dropdowns.
+            //They are instantiated as arrays when init() is called.
+            chartConfigurations: null,
+            data: null,
+            branches: null
         };
 
         layout.call(configTester);
@@ -491,6 +707,6 @@
         return configTester;
     }
 
-    return configTester$1;
+    return configTester;
 
 })));
