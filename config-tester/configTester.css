@@ -1,3 +1,6 @@
+:root {
+    --configuration-height: 250px;
+}
 .config-tester {
 }
 .ct-row {
@@ -16,22 +19,18 @@
         display: inline-block;
         margin: 0;
         padding: 0;
-        height: 75px;
+        height: var(--configuration-height);
         vertical-align: top;
     }
 
     .ct-control-div--buttons {
-        width: 10%;
+        width: 6%;
     }
-        .ct-control-div--buttons > * {
-            width: 10%;
-        }
 
     .ct-control-div--dropdowns {
-        width: 90%;
+        width: 44%;
     }
         .ct-control-div--dropdowns > * {
-            width: 10%;
         }
 
         .ct-control {
@@ -47,9 +46,31 @@
                 margin-top: 10px;
             }
             .ct-control__select {
-                width: 20%;
+                width: 25%;
                 margin: 0 5px;
             }
+            .ct-control__input {
+                margin-left: 5px;
+            }
+        .ct-data-preview {
+            width: 50%;
+            height: var(--configuration-height);
+        }
+        .ct-data-preview__header {
+            border-bottom: 1px solid lightgray;
+        }
+        .ct-data-preview__table {
+            width: 100%;
+            height: var(--configuration-height);
+            overflow-y: scroll;
+        }
+        .ct-data-preview__table .wc-table {
+            width: 100%;
+        }
+        .ct-data-preview__table .wc-table table {
+            width: 100%;
+            display: table;
+        }
 
 /*------------------------------------------------------------------------------------------------\
   Chart framework

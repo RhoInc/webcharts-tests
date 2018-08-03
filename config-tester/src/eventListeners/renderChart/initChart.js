@@ -7,6 +7,8 @@ export default function initChart() {
         data => {
             this.data = data;
             this.chart.init(data);
+            this.table = new webCharts.createTable(this.containers.dataPreview.node())
+                .init(data);
         }
     );
 }

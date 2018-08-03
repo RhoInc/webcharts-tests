@@ -10,10 +10,15 @@ export default function layout() {
             .classed('ct-row ct-row--top ct-configuration', true);
 
             this.containers.configuration.append('h1').classed('ct-row__header', true).text('Configuration');
+            this.containers.configuration
+                .append('h5')
+                .classed('ct-row__instruction', true)
+                .text('Choose a chart configuration, a Webcharts branch, and optionally a data file.');
 
             this.containers.buttons = this.containers.configuration
                 .append('div')
                 .classed('ct-control-div ct-control-div--buttons', true);
+
                 this.containers.renderControl = this.containers.buttons
                     .append('div')
                     .classed('ct-control ct-control--render', true);
@@ -46,7 +51,11 @@ export default function layout() {
                     this.containers.dataControl
                         .append('span')
                         .classed('ct-control__label', true)
-                        .text('Data');
+                        .text('Select a data file or load a .csv:');
+                    this.containers.dataSelect = this.containers.dataControl
+                        .append('input')
+                        .classed('ct-control__input ct-control__input--file', true)
+                        .attr('type', 'file');
 
                 this.containers.branchesControl = this.containers.dropdowns
                     .append('div')
@@ -59,6 +68,18 @@ export default function layout() {
                         .classed('ct-control__label', true)
                         .text('Webcharts Branch');
 
+            this.containers.dataPreviewContainer = this.containers.configuration
+                .append('div')
+                .classed('ct-control-div ct-data-preview', true);
+
+                this.containers.dataPreview = this.containers.dataPreviewContainer
+                    .append('h3')
+                    .classed('ct-data-preview__header', true)
+                    .text('Data Preview');
+                this.containers.dataPreview = this.containers.dataPreviewContainer
+                    .append('div')
+                    .classed('ct-data-preview__table', true);
+
     /**-------------------------------------------------------------------------------------------\
 	  Chart framework
     \-------------------------------------------------------------------------------------------**/
@@ -68,6 +89,10 @@ export default function layout() {
             .classed('ct-row ct-row--middle ct-chart-framework', true);
 
             this.containers.chartFramework.append('h1').classed('ct-row__header', true).text('Chart Framework');
+            this.containers.chartFramework
+                .append('h5')
+                .classed('ct-row__instruction', true)
+                .html(`Edit chart settings below and click the <span id = 'ct-render-chart-hover'>Render Chart</span> button to re-render the chart.`);
 
             this.containers.chartFramework
                 .selectAll('div.ct-component')
@@ -139,6 +164,10 @@ export default function layout() {
             .classed('ct-row ct-row--bottom ct-callbacks', true);
 
             this.containers.callbacksContainer.append('h1').classed('ct-row__header', true).text('Callbacks');
+            this.containers.callbacksContainer
+                .append('h5')
+                .classed('ct-row__instruction', true)
+                .html(`Add chart callbacks below and click the <span class = 'ct-render-chart-hover'>Render Chart</span> button to re-render the chart.`);
 
             this.containers.callbacksContainer
                 .selectAll('div.ct-component')
