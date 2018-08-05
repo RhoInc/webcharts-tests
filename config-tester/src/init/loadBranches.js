@@ -13,6 +13,14 @@ export default function loadBranches() {
                                 a.name < b.name ? -1 : 1
                         ))
                 );
+            else
+                resolve(
+                    [
+                        {name: 'master'},
+                        {name: 'bar-chart-domain'},
+                        {name: 'falsey-zeroes'},
+                    ]
+                );
         };
         xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
         xhttp.send();

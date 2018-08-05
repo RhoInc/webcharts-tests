@@ -175,7 +175,7 @@
             xhttp.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) resolve(JSON.parse(this.responseText).sort(function (a, b) {
                     return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
-                }));
+                }));else resolve([{ name: 'master' }, { name: 'bar-chart-domain' }, { name: 'falsey-zeroes' }]);
             };
             xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
             xhttp.send();
@@ -187,7 +187,6 @@
 
         //Add viz-library data to data dropdown.
         loadChartConfigurations.call(this).then(function (chartConfigurations) {
-            console.log(chartConfigurations);
             context.chartConfigurations = chartConfigurations;
             context.containers.controls.settings.selectAll('option').data(chartConfigurations, function (d) {
                 return d.type;
@@ -200,7 +199,6 @@
 
         //Add viz-library data to data dropdown.
         loadData.call(this).then(function (data) {
-            console.log(data);
             context.data = data;
             context.containers.controls.data.selectAll('option').data(data).enter().append('option').text(function (d) {
                 return d.rel_path;
@@ -211,10 +209,9 @@
 
         //Add Webcharts branches to branch dropdown.
         loadBranches.call(this).then(function (branches) {
-            console.log(branches);
             context.branches = branches;
             context.containers.controls.branches.selectAll('option').data(branches, function (d) {
-                return d.commit.sha;
+                return d.commit ? d.commit.sha : d.name;
             }).enter().append('option').text(function (d) {
                 return d.name;
             });
@@ -421,21 +418,80 @@
     }
 
     function getConfiguration() {
+        var getChartConfiguration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
         var _this = this;
 
-        this.chartConfiguration = this.containers.controls.settings.select('option:checked').datum();
-        console.log(this.chartConfiguration);
-        this.dataFile = this.chartConfiguration.data;
-        this.containers.controls.data.selectAll('option').property('selected', function (d) {
-            return d.rel_path === _this.dataFile;
+        var getData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+        var getBranch = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+        if (getChartConfiguration) {
+            this.chartConfiguration = this.containers.controls.settings.select('option:checked').datum();
+        }
+
+        if (getData) {
+            this.dataFile = this.chartConfiguration.data;
+            this.containers.controls.data.selectAll('option').property('selected', function (d) {
+                return d.rel_path === _this.dataFile;
+            });
+        }
+
+        if (getBranch) {
+            this.branch = this.containers.controls.branches.select('option:checked').datum();
+        }
+    }
+
+    function prepareTable() {
+        if (this.table) this.table.destroy();
+
+        this.table = new webCharts.createTable(this.containers.dataPreview.node());
+        this.table.ct = this;
+
+        //on init()
+        this.table.on('init', function () {
+            this.config.cols = Object.keys(this.data.raw[0]).filter(function (key) {
+                return key !== 'index';
+            });
+            this.config.headers = this.config.cols.slice();
         });
-        console.log(this.dataFile);
-        this.branch = this.containers.controls.branches.select('option:checked').datum();
-        console.log(this.branch);
+
+        //on draw()
+        this.table.on('draw', function () {
+            var context = this;
+
+            //Allow cell editing.
+            this.tbody.selectAll('tr').each(function (d) {
+                var row = d3.select(this);
+
+                row.selectAll('td').each(function (di) {
+                    di.index = d.index;
+                    var cell = d3.select(this).text('');
+
+                    //Append div to cell with the contenteditable attribute.
+                    var contentEditable = cell.append('div').attr('contenteditable', true).text(di.text);
+
+                    //Update cell datum on input.
+                    contentEditable.on('input', function () {
+                        di.text = this.textContent;
+                    });
+
+                    //Update table data on blue (when focus leaves cell).
+                    contentEditable.on('blur', function () {
+                        context.data.raw.find(function (dii) {
+                            return dii.index === di.index;
+                        })[di.col] = di.text;
+                        console.log(context.ct.data[di.index]);
+                        context.ct.chart.draw(context.ct.data);
+                    });
+                });
+            });
+        });
     }
 
     function prepareChart() {
         var _this = this;
+
+        if (this.chart) this.chart.destroy();
 
         this.settings.chart = this.chartConfiguration;
         this.settings.general = Object.keys(this.settings.chart).filter(function (key) {
@@ -447,9 +503,8 @@
         this.settings.y = this.settings.chart.y;
         this.settings.marks = this.settings.chart.marks;
         this.settings.x = this.settings.chart.x;
-        if (this.chart) this.chart.destroy();
-        if (this.table) this.table.destroy();
         this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
+        this.chart.ct = this;
     }
 
     function updateSettings() {
@@ -462,32 +517,51 @@
         });
     }
 
-    function initChart() {
+    function init$1() {
         var _this = this;
 
-        d3.csv(this.dataPath + "/" + this.dataFile, function (d) {
+        var loadData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+        if (loadData) d3.csv(this.dataPath + "/" + this.dataFile, function (d, i) {
+            d.index = i;
             return d;
         }, function (data) {
             _this.data = data;
+            _this.table.init(data);
             _this.chart.init(data);
-            _this.table = new webCharts.createTable(_this.containers.dataPreview.node()).init(data);
-        });
+        });else {
+            this.table.init(this.data);
+            this.chart.init(this.data);
+        }
     }
 
     function renderChart() {
-        var _this = this;
+                var _this = this;
 
-        this.containers.controls.render.on('click', function () {
-            getConfiguration.call(_this);
-            prepareChart.call(_this);
-            updateSettings.call(_this);
-            initChart.call(_this);
-        });
+                this.containers.controls.render.on('click', function () {
+                            //Get current dropdown selections.
+                            getConfiguration.call(_this);
+
+                            //Define table object.
+                            prepareTable.call(_this);
+
+                            //Define chart object.
+                            prepareChart.call(_this);
+
+                            //Update settings textareas.
+                            updateSettings.call(_this);
+
+                            //Read in data and initialize table and chart.
+                            init$1.call(_this);
+                });
     }
 
     function branchChange() {
+        var context = this;
 
         this.containers.branchesControl.on('change', function () {
+            delete window.webCharts;
+
             var d = d3.select(this).select('option:checked').datum();
             this.branch = d.name;
             var head = document.getElementsByTagName('head')[0];
@@ -518,6 +592,18 @@
             link.rel = 'stylesheet';
             link.href = 'https://cdn.rawgit.com/RhoInc/Webcharts/' + d.name + '/css/webcharts.css';
             head.appendChild(link);
+
+            //Redraw table and chart.
+            var webChartsLoading = setInterval(function () {
+                var webChartsExists = window.webCharts !== undefined;
+                if (webChartsExists) {
+                    clearInterval(webChartsLoading);
+                    getConfiguration.call(context, context.chartConfiguration === undefined, context.data === undefined, context.branch === undefined);
+                    prepareTable.call(context);
+                    prepareChart.call(context);
+                    init$1.call(context, context.data === undefined);
+                }
+            }, 25);
         });
     }
 

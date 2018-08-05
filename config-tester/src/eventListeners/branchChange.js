@@ -1,8 +1,15 @@
+import getConfiguration from './renderChart/getConfiguration';
+import prepareTable from './renderChart/prepareTable';
+import prepareChart from './renderChart/prepareChart';
+import init from './renderChart/init';
+
 export default function branchChange() {
     const context = this;
 
     this.containers.branchesControl
         .on('change', function() {
+            delete window.webCharts;
+
             const d = d3.select(this).select('option:checked').datum();
             this.branch = d.name;
             const head = document.getElementsByTagName('head')[0];
@@ -35,5 +42,21 @@ export default function branchChange() {
             link.rel = 'stylesheet';
             link.href = `https://cdn.rawgit.com/RhoInc/Webcharts/${d.name}/css/webcharts.css`;
             head.appendChild(link);
+
+            //Redraw table and chart.
+            const webChartsLoading = setInterval(() => {
+                const webChartsExists = window.webCharts !== undefined;
+                if (webChartsExists) {
+                    clearInterval(webChartsLoading);
+                    getConfiguration.call(context,
+                        context.chartConfiguration === undefined,
+                        context.data === undefined,
+                        context.branch === undefined
+                    );
+                    prepareTable.call(context);
+                    prepareChart.call(context);
+                    init.call(context, context.data === undefined);
+                }
+            }, 25);
         });
 }

@@ -8,7 +8,6 @@ export default function init() {
     //Add viz-library data to data dropdown.
     loadChartConfigurations.call(this)
         .then(function(chartConfigurations) {
-            console.log(chartConfigurations);
             context.chartConfigurations = chartConfigurations;
             context.containers.controls.settings
                 .selectAll('option')
@@ -23,7 +22,6 @@ export default function init() {
     //Add viz-library data to data dropdown.
     loadData.call(this)
         .then(function(data) {
-            console.log(data);
             context.data = data;
             context.containers.controls.data
                 .selectAll('option')
@@ -38,11 +36,10 @@ export default function init() {
     //Add Webcharts branches to branch dropdown.
     loadBranches.call(this)
         .then(function(branches) {
-            console.log(branches);
             context.branches = branches;
             context.containers.controls.branches
                 .selectAll('option')
-                    .data(branches, d => d.commit.sha)
+                    .data(branches, d => d.commit ? d.commit.sha : d.name)
                     .enter()
                 .append('option')
                 .text(d => d.name);
