@@ -33,6 +33,7 @@ export default function init() {
 
     //Add Webcharts branches to branch dropdown.
     loadBranches.call(this).then(function(branches) {
+        if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
         context.branches = branches;
         context.containers.controls.branches
             .selectAll('option')

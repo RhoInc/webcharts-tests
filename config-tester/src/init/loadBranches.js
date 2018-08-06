@@ -4,7 +4,7 @@ export default function loadBranches() {
     return new Promise(function(resolve, reject) {
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200)
+            if (this.readyState === 4 && this.status == 200)
                 resolve(
                     JSON.parse(this.responseText).sort(
                         (a, b) =>
@@ -17,12 +17,6 @@ export default function loadBranches() {
                                         : 1
                     )
                 );
-            else
-                resolve([
-                    { name: 'master' },
-                    { name: 'bar-chart-domain' },
-                    { name: 'falsey-zeroes' }
-                ]);
         };
         xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
         xhttp.send();

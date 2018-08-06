@@ -317,7 +317,7 @@
         return new Promise(function(resolve, reject) {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200)
+                if (this.readyState === 4 && this.status == 200)
                     resolve(
                         JSON.parse(this.responseText).sort(function(a, b) {
                             return a.name === 'master'
@@ -329,12 +329,6 @@
                                         : 1;
                         })
                     );
-                else
-                    resolve([
-                        { name: 'master' },
-                        { name: 'bar-chart-domain' },
-                        { name: 'falsey-zeroes' }
-                    ]);
             };
             xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
             xhttp.send();
@@ -378,6 +372,7 @@
 
         //Add Webcharts branches to branch dropdown.
         loadBranches.call(this).then(function(branches) {
+            if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
             context.branches = branches;
             context.containers.controls.branches
                 .selectAll('option')
