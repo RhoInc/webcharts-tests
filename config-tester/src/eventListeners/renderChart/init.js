@@ -2,7 +2,7 @@ export default function init(loadData = true) {
     if (loadData)
         d3.csv(
             `${this.dataPath}/${this.dataFile}`,
-            (d,i) => {
+            (d, i) => {
                 d.index = i;
                 return d;
             },

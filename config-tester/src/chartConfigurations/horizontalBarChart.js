@@ -4,12 +4,12 @@ export default function horizontalBarChart() {
         x: {
             type: 'linear',
             column: 'sepal width',
-            label: 'Sepal Width',
+            label: 'Sepal Width'
         },
         y: {
             type: 'ordinal',
             column: 'species',
-            label: 'Species',
+            label: 'Species'
         },
         marks: [
             {
@@ -20,7 +20,7 @@ export default function horizontalBarChart() {
                     stroke: 'black'
                 },
                 summarizeX: 'mean'
-            },
+            }
         ],
         color_by: 'species',
         color_dom: null,
@@ -28,6 +28,6 @@ export default function horizontalBarChart() {
             label: 'Species',
             location: 'top'
         },
-        resizable: false,
+        resizable: false
     };
 }

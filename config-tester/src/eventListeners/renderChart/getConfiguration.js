@@ -17,8 +17,6 @@ export default function getConfiguration(
     }
 
     if (getBranch) {
-        this.branch = this.containers.controls.branches
-            .select('option:checked')
-            .datum();
+        this.branch = this.containers.controls.branches.select('option:checked').datum();
     }
 }

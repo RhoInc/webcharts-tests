@@ -4,12 +4,12 @@ export default function verticalBarChart() {
         x: {
             type: 'ordinal',
             column: 'species',
-            label: 'Species',
+            label: 'Species'
         },
         y: {
             type: 'linear',
             column: 'sepal width',
-            label: 'Sepal Width',
+            label: 'Sepal Width'
         },
         marks: [
             {
@@ -20,7 +20,7 @@ export default function verticalBarChart() {
                     stroke: 'black'
                 },
                 summarizeY: 'mean'
-            },
+            }
         ],
         color_by: 'species',
         color_dom: null,
@@ -28,6 +28,6 @@ export default function verticalBarChart() {
             label: 'Species',
             location: 'top'
         },
-        resizable: false,
+        resizable: false
     };
 }

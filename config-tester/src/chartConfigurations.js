@@ -7,5 +7,5 @@ export default {
     horizontalBarChart,
     scatterPlot,
     timeSeriesPlot,
-    verticalBarChart,
-}
+    verticalBarChart
+};

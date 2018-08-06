@@ -4,24 +4,24 @@ export default function timeSeriesPlot() {
         x: {
             type: 'time',
             column: 'DATE',
-            label: 'Date',
+            label: 'Date'
         },
         y: {
             type: 'linear',
             column: 'Monthly Mean',
-            label: 'Mean Temperature?',
+            label: 'Mean Temperature?'
         },
         marks: [
             {
                 type: 'line',
                 per: ['STATION_NAME'],
-                summarizeY: 'mean',
+                summarizeY: 'mean'
             },
             {
                 type: 'circle',
                 per: ['STATION_NAME', 'DATE'],
-                summarizeY: 'mean',
-            },
+                summarizeY: 'mean'
+            }
         ],
         color_by: 'STATION_NAME',
         color_dom: null,
@@ -29,6 +29,6 @@ export default function timeSeriesPlot() {
             label: 'Measurement Location',
             location: 'top'
         },
-        resizable: false,
+        resizable: false
     };
 }
