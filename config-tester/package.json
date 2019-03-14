@@ -1,6 +1,6 @@
 {
   "name": "webcharts-tests",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "a Webcharts testing repository",
   "main": "configTester.js",
   "module": "src/index.js",
@@ -31,6 +31,7 @@
   "homepage": "https://github.com/RhoInc/webcharts-tests#readme",
   "dependencies": {
     "d3": "^3.5.17",
+    "promise-polyfill": "8.0.0",
     "webcharts": "^1.10.0"
   },
   "devDependencies": {

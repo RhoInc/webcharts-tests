@@ -1,14 +1,15 @@
-export default function horizontalBarChart() {
+export default function verticalBarChart() {
     return {
+        data: './data/iris.csv',
         x: {
-            type: 'linear',
-            column: 'sepal width',
-            label: 'Sepal Width',
-        },
-        y: {
             type: 'ordinal',
             column: 'species',
-            label: 'Species',
+            label: 'Species'
+        },
+        y: {
+            type: 'linear',
+            column: 'sepal width',
+            label: 'Sepal Width'
         },
         marks: [
             {
@@ -18,8 +19,8 @@ export default function horizontalBarChart() {
                 attributes: {
                     stroke: 'black'
                 },
-                summarizeX: 'mean'
-            },
+                summarizeY: 'mean'
+            }
         ],
         color_by: 'species',
         color_dom: null,
@@ -27,6 +28,6 @@ export default function horizontalBarChart() {
             label: 'Species',
             location: 'top'
         },
-        resizable: false,
+        resizable: false
     };
 }

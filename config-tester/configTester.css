@@ -1,0 +1,87 @@
+:root {
+    --configuration-height: 250px;
+}
+.config-tester {
+}
+.ct-row {
+    width: 100%;
+    margin: 12px 0;
+    display: inline-block;
+}
+
+/*------------------------------------------------------------------------------------------------\
+  Configuration
+\------------------------------------------------------------------------------------------------*/
+
+    .ct-configuration {
+    }
+    .ct-control-div {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        height: var(--configuration-height);
+        vertical-align: top;
+    }
+
+    .ct-control-div--buttons {
+        width: 6%;
+    }
+
+    .ct-control-div--dropdowns {
+        width: 44%;
+    }
+        .ct-control-div--dropdowns > * {
+        }
+
+        .ct-control {
+            width: 100%;
+            display: inline-block;
+        }
+            .ct-control__button {
+                padding: 5px;
+                display: block;
+                width: 70%;
+                margin: 0 15%;
+                height: 55px;
+                margin-top: 10px;
+            }
+            .ct-control__select {
+                width: 25%;
+                margin: 0 5px;
+            }
+            .ct-control__input {
+                margin-left: 5px;
+            }
+        .ct-data-preview {
+            width: 50%;
+            height: var(--configuration-height);
+        }
+        .ct-data-preview__header {
+            border-bottom: 1px solid lightgray;
+        }
+        .ct-data-preview__table {
+            width: 100%;
+            height: var(--configuration-height);
+            overflow-y: scroll;
+        }
+        .ct-data-preview__table .wc-table {
+            width: 100%;
+        }
+        .ct-data-preview__table .wc-table table {
+            width: 100%;
+            display: table;
+        }
+
+/*------------------------------------------------------------------------------------------------\
+  Chart framework
+\------------------------------------------------------------------------------------------------*/
+
+    .ct-chart-framework {
+    }
+
+/*------------------------------------------------------------------------------------------------\
+  Callbacks
+\------------------------------------------------------------------------------------------------*/
+
+    .ct-callbacks {
+    }
