@@ -1,4 +1,5 @@
 import layout from './layout';
+import styles from './styles';
 import eventListeners from './eventListeners';
 import createChart from './createChart';
 import init from './init';
@@ -42,6 +43,7 @@ export default function configTester(element, settings) {
     };
 
     layout.call(configTester);
+    styles.call(configTester);
     eventListeners.call(configTester);
     createChart.call(configTester);
 

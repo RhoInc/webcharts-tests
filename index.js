@@ -154,6 +154,7 @@ function drawCharts(path, root, type){
 
         //load the data and render the chart
         dataPaths.forEach(function(file) {
+            console.log(file.path);
             d3.csv(file.path, function(error, data) {
                 file.raw = data;
 
@@ -178,6 +179,7 @@ function initTestSuite(version,path){
     var location = version.slice(0,3) === '../' ? version : path + version
     var root = location + '/test';
     var rendererPath = location + '/build/webcharts.js';
+    console.log(location);
 
     var link = document.createElement('link');
     link.href =location + '/css/webcharts.css'
