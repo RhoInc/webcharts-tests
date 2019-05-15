@@ -1,15 +1,13 @@
-(function(global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined'
-        ? (module.exports = factory())
-        : typeof define === 'function' && define.amd
-            ? define(factory)
-            : (global.configTester = factory());
-})(this, function() {
-    'use strict';
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global = global || self, global.configTester = factory());
+}(this, function () { 'use strict';
 
     if (typeof Object.assign != 'function') {
         Object.defineProperty(Object, 'assign', {
             value: function assign(target, varArgs) {
+
                 if (target == null) {
                     // TypeError if undefined or null
                     throw new TypeError('Cannot convert undefined or null to object');
@@ -128,7 +126,7 @@
 
     function horizontalBarChart() {
         return {
-            data: './data/iris.csv',
+            data: './data/miscellaneous/iris.csv',
             x: {
                 type: 'linear',
                 column: 'sepal width',
@@ -139,17 +137,15 @@
                 column: 'species',
                 label: 'Species'
             },
-            marks: [
-                {
-                    type: 'bar',
-                    per: ['species'],
-                    tooltip: '[species]: $y',
-                    attributes: {
-                        stroke: 'black'
-                    },
-                    summarizeX: 'mean'
-                }
-            ],
+            marks: [{
+                type: 'bar',
+                per: ['species'],
+                tooltip: '[species]: $y',
+                attributes: {
+                    stroke: 'black'
+                },
+                summarizeX: 'mean'
+            }],
             color_by: 'species',
             color_dom: null,
             legend: {
@@ -162,7 +158,7 @@
 
     function scatterPlot() {
         return {
-            data: './data/iris.csv',
+            data: './data/miscellaneous/iris.csv',
             x: {
                 type: 'linear',
                 column: 'sepal width',
@@ -173,16 +169,14 @@
                 column: 'sepal length',
                 label: 'Sepal Length'
             },
-            marks: [
-                {
-                    type: 'circle',
-                    per: ['species', 'sepal width', 'sepal length'],
-                    tooltip: '[species]: $x/$y',
-                    attributes: {
-                        stroke: 'black'
-                    }
+            marks: [{
+                type: 'circle',
+                per: ['species', 'sepal width', 'sepal length'],
+                tooltip: '[species]: $x/$y',
+                attributes: {
+                    stroke: 'black'
                 }
-            ],
+            }],
             color_by: 'species',
             color_dom: null,
             legend: {
@@ -195,7 +189,7 @@
 
     function timeSeriesPlot() {
         return {
-            data: './data/climate_data.csv',
+            data: './data/miscellaneous/climate-data.csv',
             x: {
                 type: 'time',
                 column: 'DATE',
@@ -204,33 +198,31 @@
             y: {
                 type: 'linear',
                 column: 'Monthly Mean',
-                label: 'Mean Temperature?'
+                label: 'Mean Temperature'
             },
-            marks: [
-                {
-                    type: 'line',
-                    per: ['STATION_NAME'],
-                    summarizeY: 'mean'
-                },
-                {
-                    type: 'circle',
-                    per: ['STATION_NAME', 'DATE'],
-                    summarizeY: 'mean'
-                }
-            ],
+            marks: [{
+                type: 'line',
+                per: ['STATION_NAME'],
+                summarizeY: 'mean'
+            }, {
+                type: 'circle',
+                per: ['STATION_NAME', 'DATE'],
+                summarizeY: 'mean'
+            }],
             color_by: 'STATION_NAME',
             color_dom: null,
             legend: {
                 label: 'Measurement Location',
                 location: 'top'
             },
+            date_format: '%Y%m',
             resizable: false
         };
     }
 
     function verticalBarChart() {
         return {
-            data: './data/iris.csv',
+            data: './data/miscellaneous/iris.csv',
             x: {
                 type: 'ordinal',
                 column: 'species',
@@ -241,17 +233,15 @@
                 column: 'sepal width',
                 label: 'Sepal Width'
             },
-            marks: [
-                {
-                    type: 'bar',
-                    per: ['species'],
-                    tooltip: '[species]: $y',
-                    attributes: {
-                        stroke: 'black'
-                    },
-                    summarizeY: 'mean'
-                }
-            ],
+            marks: [{
+                type: 'bar',
+                per: ['species'],
+                tooltip: '[species]: $y',
+                attributes: {
+                    stroke: 'black'
+                },
+                summarizeY: 'mean'
+            }],
             color_by: 'species',
             color_dom: null,
             legend: {
@@ -262,51 +252,65 @@
         };
     }
 
+    function histogram() {
+        return {
+            data: './data/miscellaneous/iris.csv',
+            x: {
+                type: 'linear',
+                column: 'sepal width',
+                label: 'Sepal Width',
+                bin: 25
+            },
+            y: {
+                type: 'linear',
+                label: '# of Observations',
+                domain: [0, null]
+            },
+            marks: [{
+                type: 'bar',
+                per: ['sepal width'],
+                summarizeY: 'count',
+                tooltip: '$y observations at $x',
+                attributes: {
+                    'fill-opacity': .75
+                }
+            }],
+            resizable: false
+        };
+    }
+
     var chartConfigurations = {
         horizontalBarChart: horizontalBarChart,
         scatterPlot: scatterPlot,
         timeSeriesPlot: timeSeriesPlot,
-        verticalBarChart: verticalBarChart
+        verticalBarChart: verticalBarChart,
+        histogram: histogram
     };
 
     function loadChartConfigurations() {
-        return new Promise(function(resolve, reject) {
-            resolve(
-                Object.keys(chartConfigurations).map(function(key) {
-                    var chartConfiguration = chartConfigurations[key]();
-                    chartConfiguration.type = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-                    chartConfiguration.type;
 
-                    return chartConfiguration;
-                })
-            );
+        return new Promise(function (resolve, reject) {
+            resolve(Object.keys(chartConfigurations).map(function (key) {
+                var chartConfiguration = chartConfigurations[key]();
+                chartConfiguration.type = key.replace(/([A-Z])/g, ' $1').toLowerCase();
+                chartConfiguration.type;
+
+                return chartConfiguration;
+            }));
         });
     }
 
     function loadData() {
-        return new Promise(function(resolve, reject) {
+
+        return new Promise(function (resolve, reject) {
             var req = new XMLHttpRequest();
-            req.open(
-                'GET',
-                'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json',
-                true
-            );
-            req.onload = function() {
-                if (req.status == 200)
-                    resolve(
-                        JSON.parse(req.responseText).sort(function(a, b) {
-                            return a.name === 'master'
-                                ? -1
-                                : b.name === 'master'
-                                    ? 1
-                                    : a.name < b.name
-                                        ? -1
-                                        : 1;
-                        })
-                    );
-                else reject(Error(this.statusText));
+            req.open('GET', 'https://cdn.jsdelivr.net/gh/RhoInc/data-library/dataFiles.json', true);
+            req.onload = function () {
+                if (req.status == 200) resolve(JSON.parse(req.responseText).sort(function (a, b) {
+                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
+                }));else reject(Error(this.statusText));
             };
-            req.onerror = function() {
+            req.onerror = function () {
                 reject(Error('Network Error'));
             };
             req.send();
@@ -314,78 +318,102 @@
     }
 
     function loadBranches() {
-        return new Promise(function(resolve, reject) {
+
+        return new Promise(function (resolve, reject) {
             var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState === 4 && this.status == 200)
-                    resolve(
-                        JSON.parse(this.responseText).sort(function(a, b) {
-                            return a.name === 'master'
-                                ? -1
-                                : b.name === 'master'
-                                    ? 1
-                                    : a.name < b.name
-                                        ? -1
-                                        : 1;
-                        })
-                    );
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status == 200) resolve(JSON.parse(this.responseText).sort(function (a, b) {
+                    return a.name === 'master' ? -1 : b.name === 'master' ? 1 : a.name < b.name ? -1 : 1;
+                }));
             };
             xhttp.open('GET', 'https://api.GitHub.com/repos/RhoInc/Webcharts/branches', true);
             xhttp.send();
         });
     }
 
+    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+
+    var slicedToArray = function () {
+      function sliceIterator(arr, i) {
+        var _arr = [];
+        var _n = true;
+        var _d = false;
+        var _e = undefined;
+
+        try {
+          for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+            _arr.push(_s.value);
+
+            if (i && _arr.length === i) break;
+          }
+        } catch (err) {
+          _d = true;
+          _e = err;
+        } finally {
+          try {
+            if (!_n && _i["return"]) _i["return"]();
+          } finally {
+            if (_d) throw _e;
+          }
+        }
+
+        return _arr;
+      }
+
+      return function (arr, i) {
+        if (Array.isArray(arr)) {
+          return arr;
+        } else if (Symbol.iterator in Object(arr)) {
+          return sliceIterator(arr, i);
+        } else {
+          throw new TypeError("Invalid attempt to destructure non-iterable instance");
+        }
+      };
+    }();
+
     function init() {
         var context = this;
 
-        //Add viz-library data to data dropdown.
-        loadChartConfigurations.call(this).then(function(chartConfigurations) {
+        //Add data-library data to data dropdown.
+        Promise.all([loadChartConfigurations.call(this), loadData.call(this), loadBranches.call(this)]).then(function (values) {
+            var _values = slicedToArray(values, 3),
+                chartConfigurations = _values[0],
+                data = _values[1],
+                branches = _values[2];
+
+            //Add chart configurations to chart configuration dropdown.
+
+
             context.chartConfigurations = chartConfigurations;
-            context.containers.controls.settings
-                .selectAll('option')
-                .data(chartConfigurations, function(d) {
-                    return d.type;
-                })
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.type;
-                });
+            context.chartConfiguration = chartConfigurations[0];
+            context.containers.controls.settings.selectAll('option').data(chartConfigurations, function (d) {
+                return d.type;
+            }).enter().append('option').text(function (d) {
+                return d.type;
+            });
 
-            return chartConfigurations;
-        });
-
-        //Add viz-library data to data dropdown.
-        loadData.call(this).then(function(data) {
+            //Add data files to data dropdown.
             context.data = data;
-            context.containers.controls.data
-                .selectAll('option')
-                .data(data)
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.rel_path;
-                });
+            context.containers.controls.data.selectAll('option').data(data).enter().append('option').property('selected', function (d) {
+                return d.rel_path === context.chartConfiguration.data;
+            }).text(function (d) {
+                return d.rel_path;
+            });
 
-            return data;
-        });
-
-        //Add Webcharts branches to branch dropdown.
-        loadBranches.call(this).then(function(branches) {
+            //Add Webcharts branches to branch dropdown.
             if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
             context.branches = branches;
-            context.containers.controls.branches
-                .selectAll('option')
-                .data(branches, function(d) {
-                    return d.commit ? d.commit.sha : d.name;
-                })
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.name;
-                });
+            context.containers.controls.branches.selectAll('option').data(branches, function (d) {
+                return d.commit ? d.commit.sha : d.name;
+            }).enter().append('option').text(function (d) {
+                return d.name;
+            });
 
-            return branches;
+            context.containers.controls.render.node().click();
         });
     }
 
@@ -396,259 +424,129 @@
         Configuration
         \-------------------------------------------------------------------------------------------**/
 
-        this.containers.configuration = this.containers.main
-            .append('div')
-            .classed('ct-row ct-row--top ct-configuration', true);
+        this.containers.configuration = this.containers.main.append('div').classed('ct-row ct-row--top ct-configuration', true);
 
-        this.containers.configuration
-            .append('h1')
-            .classed('ct-row__header', true)
-            .text('Configuration');
-        this.containers.configuration
-            .append('h5')
-            .classed('ct-row__instruction', true)
-            .text('Choose a chart configuration, a Webcharts branch, and optionally a data file.');
+        this.containers.configuration.append('h1').classed('ct-row__header', true).text('Configuration');
+        this.containers.configuration.append('h5').classed('ct-row__instruction', true).text('Choose a chart configuration, a Webcharts branch, and optionally a data file.');
 
-        this.containers.buttons = this.containers.configuration
-            .append('div')
-            .classed('ct-control-div ct-control-div--buttons', true);
+        this.containers.buttons = this.containers.configuration.append('div').classed('ct-control-div ct-control-div--buttons', true);
 
-        this.containers.renderControl = this.containers.buttons
-            .append('div')
-            .classed('ct-control ct-control--render', true);
-        this.containers.controls.render = this.containers.renderControl
-            .append('button')
-            .classed('ct-control__button', true)
-            .text('Render Chart');
+        this.containers.renderControl = this.containers.buttons.append('div').classed('ct-control ct-control--render', true);
+        this.containers.controls.render = this.containers.renderControl.append('button').classed('ct-control__button', true).text('Render Chart');
 
-        this.containers.dropdowns = this.containers.configuration
-            .append('div')
-            .classed('ct-control-div ct-control-div--dropdowns', true);
+        this.containers.dropdowns = this.containers.configuration.append('div').classed('ct-control-div ct-control-div--dropdowns', true);
 
-        this.containers.settingsControl = this.containers.dropdowns
-            .append('div')
-            .classed('ct-control ct-control--settings', true);
-        this.containers.controls.settings = this.containers.settingsControl
-            .append('select')
-            .classed('ct-control__select', true);
-        this.containers.settingsControl
-            .append('span')
-            .classed('ct-control__label', true)
-            .text('Chart Configuration');
+        this.containers.settingsControl = this.containers.dropdowns.append('div').classed('ct-control ct-control--settings', true);
+        this.containers.controls.settings = this.containers.settingsControl.append('select').classed('ct-control__select', true);
+        this.containers.settingsControl.append('span').classed('ct-control__label', true).text('Chart Configuration');
 
-        this.containers.dataControl = this.containers.dropdowns
-            .append('div')
-            .classed('ct-control ct-control--data', true);
-        this.containers.controls.data = this.containers.dataControl
-            .append('select')
-            .classed('ct-control__select', true);
-        this.containers.dataControl
-            .append('span')
-            .classed('ct-control__label', true)
-            .text('Select a data file or load a .csv:');
-        this.containers.dataSelect = this.containers.dataControl
-            .append('input')
-            .classed('ct-control__input ct-control__input--file', true)
-            .attr('type', 'file');
+        this.containers.dataControl = this.containers.dropdowns.append('div').classed('ct-control ct-control--data', true);
+        this.containers.controls.data = this.containers.dataControl.append('select').classed('ct-control__select', true);
+        this.containers.dataControl.append('span').classed('ct-control__label', true).text('Select a data file or load a .csv:');
+        this.containers.dataSelect = this.containers.dataControl.append('input').classed('ct-control__input ct-control__input--file', true).attr('type', 'file');
 
-        this.containers.branchesControl = this.containers.dropdowns
-            .append('div')
-            .classed('ct-control ct-control--branches', true);
-        this.containers.controls.branches = this.containers.branchesControl
-            .append('select')
-            .classed('ct-control__select', true);
-        this.containers.branchesControl
-            .append('span')
-            .classed('ct-control__label', true)
-            .text('Webcharts Branch');
+        this.containers.branchesControl = this.containers.dropdowns.append('div').classed('ct-control ct-control--branches', true);
+        this.containers.controls.branches = this.containers.branchesControl.append('select').classed('ct-control__select', true);
+        this.containers.branchesControl.append('span').classed('ct-control__label', true).text('Webcharts Branch');
 
-        this.containers.dataPreviewContainer = this.containers.configuration
-            .append('div')
-            .classed('ct-control-div ct-data-preview', true);
+        this.containers.dataPreviewContainer = this.containers.configuration.append('div').classed('ct-control-div ct-data-preview', true);
 
-        this.containers.dataPreview = this.containers.dataPreviewContainer
-            .append('h3')
-            .classed('ct-data-preview__header', true)
-            .text('Data Preview');
-        this.containers.dataPreview = this.containers.dataPreviewContainer
-            .append('div')
-            .classed('ct-data-preview__table', true);
+        this.containers.dataPreviewContainer.append('h3').classed('ct-data-preview__header', true).text('Data Preview');
+        this.containers.dataPreview = this.containers.dataPreviewContainer.append('div').classed('ct-data-preview__table', true);
 
         /**-------------------------------------------------------------------------------------------\
         Chart framework
         \-------------------------------------------------------------------------------------------**/
 
-        this.containers.chartFramework = this.containers.main
-            .append('div')
-            .classed('ct-row ct-row--middle ct-chart-framework', true);
+        this.containers.chartFramework = this.containers.main.append('div').classed('ct-row ct-row--middle ct-chart-framework', true);
 
-        this.containers.chartFramework
-            .append('h1')
-            .classed('ct-row__header', true)
-            .text('Chart Framework');
-        this.containers.chartFramework
-            .append('h5')
-            .classed('ct-row__instruction', true)
-            .html(
-                "Edit chart settings below and click the <span id = 'ct-render-chart-hover'>Render Chart</span> button to re-render the chart."
-            );
+        this.containers.chartFramework.append('h1').classed('ct-row__header', true).text('Chart Framework');
+        this.containers.chartFramework.append('h5').classed('ct-row__instruction', true).html('Edit chart settings below and click the <span id = \'ct-render-chart-hover\'>Render Chart</span> button to re-render the chart.');
 
-        this.containers.chartFramework
-            .selectAll('div.ct-component')
-            .data(
-                [
-                    {
-                        label: 'General Settings',
-                        location: 'top'
-                    },
-                    {
-                        label: 'Y-axis Settings',
-                        location: 'left'
-                    },
-                    {
-                        label: 'Chart',
-                        location: 'middle'
-                    },
-                    {
-                        label: 'Mark Settings',
-                        location: 'right'
-                    },
-                    {
-                        label: 'X-axis Settings',
-                        location: 'bottom'
-                    }
-                ].map(function(d) {
-                    d.property = d.label
-                        .toLowerCase()
-                        .replace(' ', '-')
-                        .split(' ')
-                        .map(function(d, i) {
-                            return i === 0 ? d : d.substring(0, 1).toUpperCase() + d.substring(1);
-                        })
-                        .join('');
-                    d.setting = d.label
-                        .replace('-', ' ')
-                        .replace('Mark', 'Marks')
-                        .split(' ')[0]
-                        .toLowerCase();
+        this.containers.chartFramework.selectAll('div.ct-component').data([{
+            label: 'General Settings',
+            location: 'top'
+        }, {
+            label: 'Y-axis Settings',
+            location: 'left'
+        }, {
+            label: 'Chart',
+            location: 'middle'
+        }, {
+            label: 'Mark Settings',
+            location: 'right'
+        }, {
+            label: 'X-axis Settings',
+            location: 'bottom'
+        }].map(function (d) {
+            d.property = d.label.toLowerCase().replace(' ', '-').split(' ').map(function (d, i) {
+                return i === 0 ? d : d.substring(0, 1).toUpperCase() + d.substring(1);
+            }).join('');
+            d.setting = d.label.replace('-', ' ').replace('Mark', 'Marks').split(' ')[0].toLowerCase();
 
-                    return d;
-                })
-            )
-            .enter()
-            .append('div')
-            .attr('class', function(d) {
-                return (
-                    'ct-component ct-component--' +
-                    d.location +
-                    ' ct-' +
-                    d.label
-                        .toLowerCase()
-                        .split(' ')
-                        .join('-')
-                );
-            })
-            .each(function(d) {
-                var component = d3.select(this);
+            return d;
+        })).enter().append('div').attr('class', function (d) {
+            return 'ct-component ct-component--' + d.location + ' ct-' + d.label.toLowerCase().split(' ').join('-');
+        }).each(function (d) {
+            var component = d3.select(this);
 
-                //Attach component to containers object.
-                d.container = component;
-                if (d.property !== 'chart') context.containers.settings.push(component);
-                else context.containers[d.property] = component;
+            //Attach component to containers object.
+            d.container = component;
+            if (d.property !== 'chart') context.containers.settings.push(component);else context.containers[d.property] = component;
 
-                //Add header and input.
-                if (d.location !== 'middle') {
-                    context.containers[d.property + 'Header'] = component
-                        .append('h3')
-                        .classed('ct-component__header', true)
-                        .text(d.label);
-                    context.containers[d.property + 'Textarea'] = component
-                        .append('textarea')
-                        .classed('ct-component__textarea', true);
-                }
-            });
+            //Add header and input.
+            if (d.location !== 'middle') {
+                context.containers[d.property + 'Header'] = component.append('h3').classed('ct-component__header', true).text(d.label);
+                context.containers[d.property + 'Textarea'] = component.append('textarea').classed('ct-component__textarea', true);
+            }
+        });
 
         /**-------------------------------------------------------------------------------------------\
         Callbacks
         \-------------------------------------------------------------------------------------------**/
 
-        this.containers.callbacksContainer = this.containers.main
-            .append('div')
-            .classed('ct-row ct-row--bottom ct-callbacks', true);
+        this.containers.callbacksContainer = this.containers.main.append('div').classed('ct-row ct-row--bottom ct-callbacks', true);
 
-        this.containers.callbacksContainer
-            .append('h1')
-            .classed('ct-row__header', true)
-            .text('Callbacks');
-        this.containers.callbacksContainer
-            .append('h5')
-            .classed('ct-row__instruction', true)
-            .html(
-                "Add chart callbacks below and click the <span class = 'ct-render-chart-hover'>Render Chart</span> button to re-render the chart."
-            );
+        this.containers.callbacksContainer.append('h1').classed('ct-row__header', true).text('Callbacks');
+        this.containers.callbacksContainer.append('h5').classed('ct-row__instruction', true).html('Add chart callbacks below and click the <span class = \'ct-render-chart-hover\'>Render Chart</span> button to re-render the chart.');
 
-        this.containers.callbacksContainer
-            .selectAll('div.ct-component')
-            .data(
-                [
-                    {
-                        label: 'init',
-                        description: 'called once before chart container is laid out on webpage'
-                    },
-                    {
-                        label: 'layout',
-                        description: 'called once after chart container is laid out on webpage'
-                    },
-                    {
-                        label: 'preprocess',
-                        description:
-                            'called each time chart is drawn, prior to any data manipulation'
-                    },
-                    {
-                        label: 'datatransform',
-                        description: 'called once for each mark in settings'
-                    },
-                    {
-                        label: 'draw',
-                        description: 'called after data manipulation and before any marks are drawn'
-                    },
-                    {
-                        label: 'resize',
-                        description: 'called after chart is full-renderered'
-                    },
-                    {
-                        label: 'destroy',
-                        description: 'removes chart from webpage; must be explicitly called'
-                    }
-                ].map(function(d) {
-                    return d;
-                })
-            )
-            .enter()
-            .append('div')
-            .attr('class', function(d) {
-                return 'ct-component ct-component--callback ct-' + d.label;
-            })
-            .each(function(d) {
-                var component = d3.select(this);
+        this.containers.callbacksContainer.selectAll('div.ct-component').data([{
+            label: 'init',
+            description: 'called once before chart container is laid out on webpage'
+        }, {
+            label: 'layout',
+            description: 'called once after chart container is laid out on webpage'
+        }, {
+            label: 'preprocess',
+            description: 'called each time chart is drawn, prior to any data manipulation'
+        }, {
+            label: 'datatransform',
+            description: 'called once for each mark in settings'
+        }, {
+            label: 'draw',
+            description: 'called after data manipulation and before any marks are drawn'
+        }, {
+            label: 'resize',
+            description: 'called after chart is full-renderered'
+        }, {
+            label: 'destroy',
+            description: 'removes chart from webpage; must be explicitly called'
+        }].map(function (d) {
+            return d;
+        })).enter().append('div').attr('class', function (d) {
+            return 'ct-component ct-component--callback ct-' + d.label;
+        }).each(function (d) {
+            var component = d3.select(this);
 
-                //Attach component to containers object.
-                d.container = component;
-                context.containers.callbacks.push(component);
+            //Attach component to containers object.
+            d.container = component;
+            context.containers.callbacks.push(component);
 
-                //Add header, input, and description.
-                context.containers[d.label + 'Header'] = component
-                    .append('h3')
-                    .classed('ct-component__header', true)
-                    .text(d.label);
-                context.containers[d.label + 'Textarea'] = component
-                    .append('textarea')
-                    .classed('ct-component__textarea', true);
-                context.containers[d.label + 'Description'] = component
-                    .append('small')
-                    .classed('ct-component__description', true)
-                    .text(d.description);
-            });
+            //Add header, input, and description.
+            context.containers[d.label + 'Header'] = component.append('h3').classed('ct-component__header', true).text(d.label);
+            context.containers[d.label + 'Textarea'] = component.append('textarea').classed('ct-component__textarea', true);
+            context.containers[d.label + 'Description'] = component.append('small').classed('ct-component__description', true).text(d.description);
+        });
     }
 
     function styles() {
@@ -662,98 +560,53 @@
         var callbackMargin = 1.5;
 
         var styles = [
-            /***--------------------------------------------------------------------------------------\
+        /***--------------------------------------------------------------------------------------\
           Global styles
         \--------------------------------------------------------------------------------------***/
 
-            '#config-tester {' + '}',
-            '.ct-row {' + 'width: 100%;' + 'display: inline-block;' + '}',
-            '.ct-row__header {' +
-                'width: 100%;' +
-                'padding-bottom: 5px;' +
-                'border-bottom: 1px solid lightgray;' +
-                'margin-bottom: 5px;' +
-                '}',
-            '.ct-component {' + 'display: inline-block;' + 'vertical-align: top;' + '}',
-            '.ct-component__header {' + 'text-align: left;' + '}',
-            '.ct-component__textarea {' +
-                'white-space: pre;' +
-                'font-family: courier;' +
-                'width: 100%;' +
-                '}',
+        '#config-tester {' + '}', '.ct-row {' + 'width: 100%;' + 'display: inline-block;' + '}', '.ct-row__header {' + 'width: 100%;' + 'padding-bottom: 5px;' + 'border-bottom: 1px solid lightgray;' + 'margin-bottom: 5px;' + '}', '.ct-component {' + 'display: inline-block;' + 'vertical-align: top;' + '}', '.ct-component__header {' + 'text-align: left;' + '}', '.ct-component__textarea {' + 'white-space: pre;' + 'font-family: courier;' + 'width: 100%;' + '}',
 
-            /***--------------------------------------------------------------------------------------\
+        /***--------------------------------------------------------------------------------------\
           Chart framework
         \--------------------------------------------------------------------------------------***/
 
-            '.ct-chart-framework {' + '}',
-            '.ct-callbacks > .ct-component {' + ('width: ' + settingsWidth + '%;') + '}',
+        '.ct-chart-framework {' + '}', '.ct-callbacks > .ct-component {' + ('width: ' + settingsWidth + '%;') + '}',
 
-            /*****----------------------------------------------------------------------------\
+        /*****----------------------------------------------------------------------------\
           General Settings
         \----------------------------------------------------------------------------*****/
 
-            '.ct-component--top {' +
-                ('width: ' + settingsWidth + '%;') +
-                ('margin-right: ' + (settingsWidth + settingsMargin) + '%;') +
-                ('margin-left: ' + (settingsWidth + settingsMargin) + '%;') +
-                '}',
-            '.ct-component--top .ct-component__textarea {' + '}',
+        '.ct-component--top {' + ('width: ' + settingsWidth + '%;') + ('margin-right: ' + (settingsWidth + settingsMargin) + '%;') + ('margin-left: ' + (settingsWidth + settingsMargin) + '%;') + '}', '.ct-component--top .ct-component__textarea {' + '}',
 
-            /*****----------------------------------------------------------------------------\
+        /*****----------------------------------------------------------------------------\
           Y-axis Settings
         \----------------------------------------------------------------------------*****/
 
-            '.ct-component--left {' +
-                ('width: ' + settingsWidth + '%;') +
-                ('height: ' + chartHeight + 'px;') +
-                'float: left;' +
-                '}',
-            '.ct-component--left .ct-component__textarea {' + 'height: 100%;' + '}',
+        '.ct-component--left {' + ('width: ' + settingsWidth + '%;') + ('height: ' + chartHeight + 'px;') + 'float: left;' + '}', '.ct-component--left .ct-component__textarea {' + 'height: 100%;' + '}',
 
-            /*****----------------------------------------------------------------------------\
+        /*****----------------------------------------------------------------------------\
           Chart
         \----------------------------------------------------------------------------*****/
 
-            '.ct-chart {' +
-                ('width: ' + settingsWidth + '%;') +
-                ('height: ' + chartHeight + 'px;') +
-                ('padding: 10px ' + settingsPadding + '%;') +
-                '}',
+        '.ct-chart {' + ('width: ' + settingsWidth + '%;') + ('height: ' + chartHeight + 'px;') + ('padding: 10px ' + settingsPadding + '%;') + '}',
 
-            /*****----------------------------------------------------------------------------\
+        /*****----------------------------------------------------------------------------\
           Mark Settings
         \----------------------------------------------------------------------------*****/
 
-            '.ct-component--right {' +
-                ('width: ' + settingsWidth + '%;') +
-                ('height: ' + chartHeight + 'px;') +
-                'float: right;' +
-                '}',
-            '.ct-component--right .ct-component__textarea {' + 'height: 100%;' + '}',
+        '.ct-component--right {' + ('width: ' + settingsWidth + '%;') + ('height: ' + chartHeight + 'px;') + 'float: right;' + '}', '.ct-component--right .ct-component__textarea {' + 'height: 100%;' + '}',
 
-            /*****----------------------------------------------------------------------------\
+        /*****----------------------------------------------------------------------------\
           X-axis Settings
         \----------------------------------------------------------------------------*****/
 
-            '.ct-component--bottom {' +
-                ('width: ' + settingsWidth + '%;') +
-                ('margin-right: ' + (settingsWidth + settingsMargin) + '%;') +
-                ('margin-left: ' + (settingsWidth + settingsMargin) + '%;') +
-                '}',
-            '.ct-component--bottom .ct-component__textarea {' + '}',
+        '.ct-component--bottom {' + ('width: ' + settingsWidth + '%;') + ('margin-right: ' + (settingsWidth + settingsMargin) + '%;') + ('margin-left: ' + (settingsWidth + settingsMargin) + '%;') + '}', '.ct-component--bottom .ct-component__textarea {' + '}',
 
-            /***--------------------------------------------------------------------------------------\
+        /***--------------------------------------------------------------------------------------\
           Callback
         \--------------------------------------------------------------------------------------***/
 
-            '.ct-callbacks {' + '}',
-            '.ct-callbacks > .ct-component {' + ('width: ' + callbackWidth + '%;') + '}',
-            '.ct-callbacks > .ct-component:not(.ct-destroy) {' +
-                ('margin-right: ' + callbackMargin + '%;') +
-                '}',
-            '.ct-component--callback .ct-component__textarea {' + 'height: 250px;' + '}'
-        ];
+        '.ct-callbacks {' + '}', '.ct-callbacks > .ct-component {' + ('width: ' + callbackWidth + '%;') + '}', '.ct-callbacks > .ct-component:not(.ct-destroy) {' + ('margin-right: ' + callbackMargin + '%;') + '}', '.ct-component--callback .ct-component__textarea {' + 'height: 250px;' + '}'];
 
         var style = document.createElement('style');
         style.type = 'text/css';
@@ -761,9 +614,22 @@
         document.getElementsByTagName('head')[0].appendChild(style);
     }
 
+    function reset() {
+        delete this.chartConfiguration;
+        delete this.dataFile;
+        delete this.branch;
+
+        if (this.table && this.table.destroy) this.table.destroy();else this.containers.dataPreview.selectAll('*').remove();
+
+        if (this.chart && this.chart.destroy) this.chart.destroy();else this.containers.chart.selectAll('*').remove();
+
+        this.containers.settings.forEach(function (container) {
+            container.select('textarea').text('').attr('rows', null);
+        });
+    }
+
     function getConfiguration() {
-        var getChartConfiguration =
-            arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+        var getChartConfiguration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
         var _this = this;
 
@@ -771,14 +637,12 @@
         var getBranch = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
         if (getChartConfiguration) {
-            this.chartConfiguration = this.containers.controls.settings
-                .select('option:checked')
-                .datum();
+            this.chartConfiguration = this.containers.controls.settings.select('option:checked').datum();
         }
 
         if (getData) {
             this.dataFile = this.chartConfiguration.data;
-            this.containers.controls.data.selectAll('option').property('selected', function(d) {
+            this.containers.controls.data.selectAll('option').property('selected', function (d) {
                 return d.rel_path === _this.dataFile;
             });
         }
@@ -789,48 +653,44 @@
     }
 
     function prepareTable() {
-        if (this.table) this.table.destroy();
+        if (this.table && this.table.destroy) this.table.destroy();else this.containers.dataPreview.selectAll('*').remove();
 
         this.table = new webCharts.createTable(this.containers.dataPreview.node());
         this.table.ct = this;
 
         //on init()
-        this.table.on('init', function() {
-            this.config.cols = Object.keys(this.data.raw[0]).filter(function(key) {
-                return key !== 'index';
-            });
-            this.config.headers = this.config.cols.slice();
+        this.table.on('init', function () {
+            if (this.data) {
+                this.config.cols = Object.keys(this.data.raw[0]).filter(function (key) {
+                    return key !== 'index';
+                });
+                this.config.headers = this.config.cols.slice();
+            }
         });
 
         //on draw()
-        this.table.on('draw', function() {
+        this.table.on('draw', function () {
             var context = this;
 
             //Allow cell editing.
-            this.tbody.selectAll('tr').each(function(d) {
+            this.tbody.selectAll('tr').each(function (d) {
                 var row = d3.select(this);
 
-                row.selectAll('td').each(function(di) {
+                row.selectAll('td').each(function (di) {
                     di.index = d.index;
                     var cell = d3.select(this).text('');
 
                     //Append div to cell with the contenteditable attribute.
-                    var contentEditable = cell
-                        .append('div')
-                        .attr('contenteditable', true)
-                        .text(di.text);
+                    var contentEditable = cell.append('div').attr('contenteditable', true).text(di.text);
 
                     //Update cell datum on input.
-                    contentEditable.on(
-                        /Trident/.test(navigator.userAgent) ? 'textinput' : 'input',
-                        function() {
-                            di.text = this.textContent;
-                        }
-                    );
+                    contentEditable.on(/Trident/.test(navigator.userAgent) ? 'textinput' : 'input', function () {
+                        di.text = this.textContent;
+                    });
 
                     //Update table data on blue (when focus leaves cell).
-                    contentEditable.on('blur', function() {
-                        var datum = context.ct.data.find(function(dii) {
+                    contentEditable.on('blur', function () {
+                        var datum = context.ct.data.find(function (dii) {
                             return dii.index === di.index;
                         });
                         datum[di.col] = di.text;
@@ -841,23 +701,27 @@
         });
     }
 
-    function prepareChart() {
+    function copyChartSettings() {
         var _this = this;
 
-        if (this.chart) this.chart.destroy();
-
         this.settings.chart = this.chartConfiguration;
-        this.settings.general = Object.keys(this.settings.chart)
-            .filter(function(key) {
-                return ['data', 'x', 'y', 'marks'].indexOf(key) < 0;
-            })
-            .reduce(function(acc, cur) {
-                acc[cur] = _this.settings.chart[cur];
-                return acc;
-            }, {});
+        for (var setting in this.chartConfiguration) {
+            if (this.settings[setting]) this.settings.chart[setting] = this.settings[setting];
+        }this.settings.general = Object.keys(this.settings.chart).filter(function (key) {
+            return ['type', 'data', 'x', 'y', 'marks'].indexOf(key) < 0;
+        }).reduce(function (acc, cur) {
+            acc[cur] = _this.settings.chart[cur];
+            return acc;
+        }, {});
         this.settings.y = this.settings.chart.y;
         this.settings.marks = this.settings.chart.marks;
         this.settings.x = this.settings.chart.x;
+    }
+
+    function prepareChart() {
+        if (this.chart && this.chart.destroy) this.chart.destroy();else this.containers.chart.selectAll('*').remove();
+
+        copyChartSettings.call(this);
         this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
         this.chart.ct = this;
     }
@@ -865,16 +729,10 @@
     function updateSettings() {
         var _this = this;
 
-        this.containers.settings.forEach(function(container) {
+        this.containers.settings.forEach(function (container) {
             var d = container.datum();
             var json = JSON.stringify(_this.settings[d.setting], null, 4);
-            container
-                .select('textarea')
-                .text(JSON.stringify(_this.settings[d.setting], null, 4))
-                .attr(
-                    'rows',
-                    ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null
-                );
+            container.select('textarea').text(JSON.stringify(_this.settings[d.setting], null, 4)).attr('rows', ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null);
         });
     }
 
@@ -883,64 +741,73 @@
 
         var loadData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
-        if (loadData)
-            d3.csv(
-                this.dataPath + '/' + this.dataFile,
-                function(d, i) {
-                    d.index = i;
-                    return d;
-                },
-                function(data) {
-                    _this.data = data;
-                    _this.table.init(data);
-                    _this.chart.init(data);
-                }
-            );
-        else {
+        if (loadData) d3.csv(this.dataPath + "/" + this.dataFile, function (d, i) {
+            d.index = i;
+            return d;
+        }, function (data) {
+            _this.data = data;
+            _this.table.init(data);
+            _this.chart.init(data);
+        });else {
             this.table.init(this.data);
             this.chart.init(this.data);
         }
     }
 
     function renderChart() {
-        var _this = this;
+            var _this = this;
 
-        this.containers.controls.render.on('click', function() {
-            //Get current dropdown selections.
-            getConfiguration.call(_this);
+            this.containers.controls.render.on('click', function () {
+                    reset.call(_this);
 
-            //Define table object.
-            prepareTable.call(_this);
+                    //Get current dropdown selections.
+                    getConfiguration.call(_this);
 
-            //Define chart object.
-            prepareChart.call(_this);
+                    //Define table object.
+                    prepareTable.call(_this);
 
-            //Update settings textareas.
-            updateSettings.call(_this);
+                    //Define chart object.
+                    prepareChart.call(_this);
 
-            //Read in data and initialize table and chart.
-            init$1.call(_this);
+                    //Update settings textareas.
+                    updateSettings.call(_this);
+
+                    //Read in data and initialize table and chart.
+                    init$1.call(_this);
+            });
+    }
+
+    function chartConfigurationChange() {
+        var context = this;
+
+        this.containers.controls.settings.on('change', function () {
+            context.chartConfiguration = _.clone(d3.select(this).selectAll('option').filter(function () {
+                return this.selected;
+            }).datum());
+            context.containers.controls.data.selectAll('option').property('selected', function (d) {
+                return d.rel_path === context.chartConfiguration.data;
+            });
+            copyChartSettings.call(context);
+            console.log(context.settings);
+            updateSettings.call(context);
+            context.containers.controls.render.node().click();
         });
     }
 
     function branchChange() {
         var context = this;
 
-        this.containers.branchesControl.on('change', function() {
+        this.containers.branchesControl.on('change', function () {
             delete window.webCharts;
 
-            var d = d3
-                .select(this)
-                .select('option:checked')
-                .datum();
+            var d = d3.select(this).select('option:checked').datum();
             this.branch = d.name;
             var head = document.getElementsByTagName('head')[0];
 
             //Load Webcharts .js file.
             var script = document.createElement('script');
             script.type = 'text/javascript';
-            script.src =
-                'https://cdn.rawgit.com/RhoInc/Webcharts/' + d.name + '/build/webcharts.js';
+            script.src = 'https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@' + d.name + '/build/webcharts.js';
             head.appendChild(script);
 
             //Disable Webcharts .css file.
@@ -965,92 +832,37 @@
             head.appendChild(link);
 
             //Redraw table and chart.
-            var webChartsLoading = setInterval(function() {
+            var webChartsLoading = setInterval(function () {
                 var webChartsExists = window.webCharts !== undefined;
                 if (webChartsExists) {
                     clearInterval(webChartsLoading);
-                    getConfiguration.call(
-                        context,
-                        context.chartConfiguration === undefined,
-                        context.data === undefined,
-                        context.branch === undefined
-                    );
-                    prepareTable.call(context);
-                    prepareChart.call(context);
-                    init$1.call(context, context.data === undefined);
+                    getConfiguration.call(context, context.chartConfiguration === undefined, context.data === undefined, context.branch === undefined);
+                    console.log(webCharts.version);
+                    try {
+                        prepareTable.call(context);
+                        prepareChart.call(context);
+                        init$1.call(context, context.data === undefined);
+                    } catch (err) {
+                        console.warn(err);
+                        context.containers.chart.text('Webcharts branch ' + d.name + ' is experiencing technical difficulties.  Please select another branch or version.');
+                    }
                 }
             }, 25);
         });
     }
 
-    var _typeof =
-        typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
-            ? function(obj) {
-                  return typeof obj;
-              }
-            : function(obj) {
-                  return obj &&
-                      typeof Symbol === 'function' &&
-                      obj.constructor === Symbol &&
-                      obj !== Symbol.prototype
-                      ? 'symbol'
-                      : typeof obj;
-              };
-
-    var slicedToArray = (function() {
-        function sliceIterator(arr, i) {
-            var _arr = [];
-            var _n = true;
-            var _d = false;
-            var _e = undefined;
-
-            try {
-                for (
-                    var _i = arr[Symbol.iterator](), _s;
-                    !(_n = (_s = _i.next()).done);
-                    _n = true
-                ) {
-                    _arr.push(_s.value);
-
-                    if (i && _arr.length === i) break;
-                }
-            } catch (err) {
-                _d = true;
-                _e = err;
-            } finally {
-                try {
-                    if (!_n && _i['return']) _i['return']();
-                } finally {
-                    if (_d) throw _e;
-                }
-            }
-
-            return _arr;
-        }
-
-        return function(arr, i) {
-            if (Array.isArray(arr)) {
-                return arr;
-            } else if (Symbol.iterator in Object(arr)) {
-                return sliceIterator(arr, i);
-            } else {
-                throw new TypeError('Invalid attempt to destructure non-iterable instance');
-            }
-        };
-    })();
-
     function settings() {
         var context = this;
 
-        this.containers.settings.forEach(function(container) {
-            container.select('textarea').on('change', function(d) {
-                var updatedSettings = JSON.parse(this.value);
+        this.containers.settings.forEach(function (container) {
+            container.select('textarea').on('change', function (d) {
+                var updatedSettings = JSON5.parse(this.value);
 
                 if (d.property !== 'general') {
                     context.settings[d.setting] = updatedSettings;
                     context.chart.config[d.setting] = updatedSettings;
                 } else {
-                    var properties = Object.keys(updatedSettings).filter(function(key) {
+                    var properties = Object.keys(updatedSettings).filter(function (key) {
                         return ['x', 'y', 'marks'].indexOf(key) < 0;
                     });
                     var _x$y$marks = {
@@ -1068,11 +880,7 @@
                     var _iteratorError = undefined;
 
                     try {
-                        for (
-                            var _iterator = properties[Symbol.iterator](), _step;
-                            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-                            _iteratorNormalCompletion = true
-                        ) {
+                        for (var _iterator = properties[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                             var property = _step.value;
 
                             var _updatedSettings$prop = slicedToArray(updatedSettings[property], 2);
@@ -1105,8 +913,7 @@
         var copy = void 0;
 
         //boolean, number, string, null, undefined
-        if ('object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) || null == obj)
-            return obj;
+        if ('object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) || null == obj) return obj;
 
         //date
         if (obj instanceof Date) {
@@ -1139,38 +946,30 @@
     function callbacks() {
         var context = this;
 
-        this.containers.callbacks.forEach(function(container) {
-            container.select('textarea').on('change', function(d) {
+        this.containers.callbacks.forEach(function (container) {
+            container.select('textarea').on('change', function (d) {
                 context.callbacks[d.label] = this.value;
 
-                context.chart.on(d.label, function() {
+                context.chart.on(d.label, function () {
                     try {
                         eval(context.callbacks[d.label]);
                     } catch (error) {
-                        alert(
-                            "That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key."
-                        );
+                        alert("That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key.");
                         console.error(error);
                     }
                 });
 
-                if (['init', 'layout', 'destroy'].indexOf(d.label) < 0) context.chart.draw();
-                else {
+                if (['init', 'layout', 'destroy'].indexOf(d.label) < 0) context.chart.draw();else {
                     console.log('reinitialized');
                     context.chart.destroy();
-                    context.chart = webCharts.createChart(
-                        context.containers.chart.node(),
-                        context.settings.chart
-                    );
+                    context.chart = webCharts.createChart(context.containers.chart.node(), context.settings.chart);
 
                     var _loop = function _loop(callback) {
-                        context.chart.on(callback, function() {
+                        context.chart.on(callback, function () {
                             try {
                                 eval(context.callbacks[callback]);
                             } catch (error) {
-                                alert(
-                                    "That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key."
-                                );
+                                alert("That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key.");
                                 console.error(error);
                             }
                         });
@@ -1187,16 +986,15 @@
 
     function eventListeners() {
         renderChart.call(this);
+        chartConfigurationChange.call(this);
+        //dataChange.call(this);
         branchChange.call(this);
         settings.call(this);
         callbacks.call(this);
     }
 
     function configTester(element) {
-        var dataPath =
-            arguments.length > 1 && arguments[1] !== undefined
-                ? arguments[1]
-                : 'https://cdn.rawgit.com/RhoInc/viz-library/master';
+        var dataPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'https://raw.githubusercontent.com/RhoInc/data-library/master';
 
         var configTester = {
             init: init,
@@ -1205,11 +1003,7 @@
 
             //Containers is an object whose properties represent d3 selections of elements in the DOM.
             containers: {
-                main: d3
-                    .select(element)
-                    .append('div')
-                    .classed('config-tester', true)
-                    .attr('id', 'config-tester' + (d3.selectAll('.config-tester').size() + 1)),
+                main: d3.select(element).append('div').classed('config-tester', true).attr('id', 'config-tester' + (d3.selectAll('.config-tester').size() + 1)),
                 controls: {},
                 settings: [],
                 callbacks: []
@@ -1219,10 +1013,10 @@
             settings: {
                 data: null,
                 chart: null,
-                general: null,
+                x: null,
                 y: null,
                 marks: null,
-                x: null
+                general: null
             },
 
             //Callbacks is an object whose methods become chart callbacks.
@@ -1251,4 +1045,5 @@
     }
 
     return configTester;
-});
+
+}));

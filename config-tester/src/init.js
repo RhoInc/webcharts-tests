@@ -5,34 +5,35 @@ import loadBranches from './init/loadBranches';
 export default function init() {
     const context = this;
 
-    //Add viz-library data to data dropdown.
-    loadChartConfigurations.call(this).then(function(chartConfigurations) {
+    //Add data-library data to data dropdown.
+    Promise.all([
+        loadChartConfigurations.call(this),
+        loadData.call(this),
+        loadBranches.call(this),
+    ]).then(function(values) {
+        let [chartConfigurations,data,branches] = values;
+
+        //Add chart configurations to chart configuration dropdown.
         context.chartConfigurations = chartConfigurations;
+        context.chartConfiguration = chartConfigurations[0];
         context.containers.controls.settings
             .selectAll('option')
-            .data(chartConfigurations, d => d.type)
-            .enter()
+                .data(chartConfigurations, d => d.type)
+                .enter()
             .append('option')
             .text(d => d.type);
 
-        return chartConfigurations;
-    });
-
-    //Add viz-library data to data dropdown.
-    loadData.call(this).then(function(data) {
+        //Add data files to data dropdown.
         context.data = data;
         context.containers.controls.data
             .selectAll('option')
             .data(data)
             .enter()
             .append('option')
+            .property('selected', d => d.rel_path === context.chartConfiguration.data)
             .text(d => d.rel_path);
 
-        return data;
-    });
-
-    //Add Webcharts branches to branch dropdown.
-    loadBranches.call(this).then(function(branches) {
+        //Add Webcharts branches to branch dropdown.
         if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
         context.branches = branches;
         context.containers.controls.branches
@@ -42,6 +43,6 @@ export default function init() {
             .append('option')
             .text(d => d.name);
 
-        return branches;
+        context.containers.controls.render.node().click();
     });
 }

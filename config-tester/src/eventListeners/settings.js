@@ -3,7 +3,7 @@ export default function settings() {
 
     this.containers.settings.forEach(container => {
         container.select('textarea').on('change', function(d) {
-            const updatedSettings = JSON.parse(this.value);
+            const updatedSettings = JSON5.parse(this.value);
 
             if (d.property !== 'general') {
                 context.settings[d.setting] = updatedSettings;

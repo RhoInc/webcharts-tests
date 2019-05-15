@@ -1,6 +1,6 @@
 export default function timeSeriesPlot() {
     return {
-        data: './data/climate_data.csv',
+        data: './data/miscellaneous/climate-data.csv',
         x: {
             type: 'time',
             column: 'DATE',
@@ -9,7 +9,7 @@ export default function timeSeriesPlot() {
         y: {
             type: 'linear',
             column: 'Monthly Mean',
-            label: 'Mean Temperature?'
+            label: 'Mean Temperature'
         },
         marks: [
             {
@@ -29,6 +29,7 @@ export default function timeSeriesPlot() {
             label: 'Measurement Location',
             location: 'top'
         },
+        date_format: '%Y%m',
         resizable: false
     };
 }

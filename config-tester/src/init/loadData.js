@@ -5,7 +5,7 @@ export default function loadData() {
         const req = new XMLHttpRequest();
         req.open(
             'GET',
-            'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json',
+            'https://cdn.jsdelivr.net/gh/RhoInc/data-library/dataFiles.json',
             true
         );
         req.onload = function() {

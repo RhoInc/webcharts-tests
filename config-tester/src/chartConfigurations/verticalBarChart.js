@@ -1,6 +1,6 @@
 export default function verticalBarChart() {
     return {
-        data: './data/iris.csv',
+        data: './data/miscellaneous/iris.csv',
         x: {
             type: 'ordinal',
             column: 'species',

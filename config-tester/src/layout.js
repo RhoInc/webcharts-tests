@@ -72,7 +72,7 @@ export default function layout() {
                 .append('div')
                 .classed('ct-control-div ct-data-preview', true);
 
-                this.containers.dataPreview = this.containers.dataPreviewContainer
+                this.containers.dataPreviewContainer
                     .append('h3')
                     .classed('ct-data-preview__header', true)
                     .text('Data Preview');

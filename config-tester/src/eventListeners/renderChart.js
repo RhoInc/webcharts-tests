@@ -1,3 +1,4 @@
+import reset from '../reset';
 import getConfiguration from './renderChart/getConfiguration';
 import prepareTable from './renderChart/prepareTable';
 import prepareChart from './renderChart/prepareChart';
@@ -6,6 +7,8 @@ import init from './renderChart/init';
 
 export default function renderChart() {
     this.containers.controls.render.on('click', () => {
+        reset.call(this);
+
         //Get current dropdown selections.
         getConfiguration.call(this);
 

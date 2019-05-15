@@ -6,7 +6,7 @@ import eventListeners from './eventListeners';
 
 export default function configTester(
     element,
-    dataPath = 'https://cdn.rawgit.com/RhoInc/viz-library/master'
+    dataPath = 'https://raw.githubusercontent.com/RhoInc/data-library/master'
 ) {
     const configTester = {
         init,
@@ -29,10 +29,10 @@ export default function configTester(
         settings: {
             data: null,
             chart: null,
-            general: null,
+            x: null,
             y: null,
             marks: null,
-            x: null
+            general: null
         },
 
         //Callbacks is an object whose methods become chart callbacks.

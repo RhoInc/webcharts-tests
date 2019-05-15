@@ -19,7 +19,7 @@ export default function branchChange() {
         //Load Webcharts .js file.
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = `https://cdn.rawgit.com/RhoInc/Webcharts/${d.name}/build/webcharts.js`;
+        script.src = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${d.name}/build/webcharts.js`;
         head.appendChild(script);
 
         //Disable Webcharts .css file.
@@ -54,9 +54,16 @@ export default function branchChange() {
                     context.data === undefined,
                     context.branch === undefined
                 );
-                prepareTable.call(context);
-                prepareChart.call(context);
-                init.call(context, context.data === undefined);
+                console.log(webCharts.version);
+                try {
+                    prepareTable.call(context);
+                    prepareChart.call(context);
+                    init.call(context, context.data === undefined);
+                } catch(err) {
+                    console.warn(err);
+                    context.containers.chart
+                        .text(`Webcharts branch ${d.name} is experiencing technical difficulties.  Please select another branch or version.`);
+                }
             }
         }, 25);
     });
