@@ -11,7 +11,9 @@ export default function webchartsVersion() {
         //Load Webcharts .js file.
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${this.webchartsVersion.name}/build/webcharts.js`;
+        script.src = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${
+            this.webchartsVersion.name
+        }/build/webcharts.js`;
         head.appendChild(script);
 
         //Disable Webcharts .css file.
@@ -32,7 +34,9 @@ export default function webchartsVersion() {
         const link = document.createElement('link');
         link.type = 'text/css';
         link.rel = 'stylesheet';
-        link.href = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${this.webchartsVersion.name}/css/webcharts.css`;
+        link.href = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${
+            this.webchartsVersion.name
+        }/css/webcharts.css`;
         head.appendChild(link);
 
         //Redraw table and chart.

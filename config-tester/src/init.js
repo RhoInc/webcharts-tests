@@ -30,17 +30,18 @@ export default function init() {
         updateDataFiles.call(this, dataFiles);
         updateWebchartsVersions.call(
             this,
-            Array.isArray(webchartsVersions) && webchartsVersions.length ? webchartsVersions : [{ name: 'master' }]
+            Array.isArray(webchartsVersions) && webchartsVersions.length
+                ? webchartsVersions
+                : [{ name: 'master' }]
         );
 
-        loadData.call(this)
-            .then(data => {
-                this.data = data;
-                initTable.call(this);
-                copyChartSettings.call(this);
-                initChart.call(this);
-                updateChartFrameworkSettings.call(this);
-            });
+        loadData.call(this).then(data => {
+            this.data = data;
+            initTable.call(this);
+            copyChartSettings.call(this);
+            initChart.call(this);
+            updateChartFrameworkSettings.call(this);
+        });
 
         defineEventListeners.call(this);
     });

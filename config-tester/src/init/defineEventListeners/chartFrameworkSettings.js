@@ -9,7 +9,6 @@ export default function chartFrameworkSettings() {
             if (d.setting !== 'general') {
                 context.settings[d.setting] = updatedSettings;
                 context.settings.chart[d.setting] = updatedSettings;
-                context.chart.config[d.setting] = updatedSettings;
             }
             //Update general settings.
             else {
@@ -20,11 +19,8 @@ export default function chartFrameworkSettings() {
                     const setting = updatedSettings[property];
                     context.settings.general[property] = setting;
                     context.settings.chart[property] = setting;
-                    context.chart.config[property] = setting;
                 });
             }
-
-            context.chart.draw();
         });
     });
 }

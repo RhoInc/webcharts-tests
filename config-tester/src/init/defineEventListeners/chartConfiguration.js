@@ -10,13 +10,12 @@ export default function chartConfiguration() {
     this.containers.controls.chartConfiguration.on('change', () => {
         updateChartConfiguration.call(this);
         updateDataFile.call(this, this.dataFile);
-        loadData.call(this)
-            .then(data => {
-                this.data = data;
-                initTable.call(this);
-                copyChartSettings.call(this);
-                initChart.call(this);
-                updateChartFrameworkSettings.call(this);
-            });
+        loadData.call(this).then(data => {
+            this.data = data;
+            initTable.call(this);
+            copyChartSettings.call(this);
+            initChart.call(this);
+            updateChartFrameworkSettings.call(this);
+        });
     });
 }

@@ -16,10 +16,10 @@ export default function configuration() {
         .append('div')
         .classed('ct-control-div ct-control-div--buttons', true);
 
-    this.containers.renderControl = this.containers.buttons
+    this.containers.renderChartControl = this.containers.buttons
         .append('div')
         .classed('ct-control ct-control--render', true);
-    this.containers.controls.render = this.containers.renderControl
+    this.containers.controls.renderChart = this.containers.renderChartControl
         .append('button')
         .classed('ct-control__button', true)
         .text('Render Chart');

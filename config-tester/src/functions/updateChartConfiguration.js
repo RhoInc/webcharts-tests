@@ -3,7 +3,11 @@ export default function updateChartConfiguration(type) {
     if (type) {
         options.property('selected', d => d.type === type);
     } else {
-        this.chartConfiguration = options.filter(function() { return this.selected; }).datum();
+        this.chartConfiguration = options
+            .filter(function() {
+                return this.selected;
+            })
+            .datum();
         this.dataFile = this.chartConfiguration.dataFile;
     }
 }

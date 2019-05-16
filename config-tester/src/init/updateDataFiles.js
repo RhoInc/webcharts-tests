@@ -7,6 +7,7 @@ export default function updateDataFiles(dataFiles) {
         .data(dataFiles)
         .enter()
         .append('option')
+        .attr('label', d => d.rel_path.split('/').pop())
         .property('selected', d => d.rel_path === this.chartConfiguration.dataFile)
         .text(d => d.rel_path);
 }
