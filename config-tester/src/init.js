@@ -9,17 +9,17 @@ export default function init() {
     Promise.all([
         loadChartConfigurations.call(this),
         loadData.call(this),
-        loadBranches.call(this),
+        loadBranches.call(this)
     ]).then(function(values) {
-        let [chartConfigurations,data,branches] = values;
+        let [chartConfigurations, data, branches] = values;
 
         //Add chart configurations to chart configuration dropdown.
         context.chartConfigurations = chartConfigurations;
         context.chartConfiguration = chartConfigurations[0];
         context.containers.controls.settings
             .selectAll('option')
-                .data(chartConfigurations, d => d.type)
-                .enter()
+            .data(chartConfigurations, d => d.type)
+            .enter()
             .append('option')
             .text(d => d.type);
 

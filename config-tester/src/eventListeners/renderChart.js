@@ -1,5 +1,6 @@
 import reset from '../reset';
 import getConfiguration from './renderChart/getConfiguration';
+import copyChartSettings from './renderChart/copyChartSettings';
 import prepareTable from './renderChart/prepareTable';
 import prepareChart from './renderChart/prepareChart';
 import updateSettings from './renderChart/updateSettings';
@@ -7,10 +8,13 @@ import init from './renderChart/init';
 
 export default function renderChart() {
     this.containers.controls.render.on('click', () => {
-        reset.call(this);
+        //reset.call(this);
 
         //Get current dropdown selections.
         getConfiguration.call(this);
+
+        //Copy chart settings.
+        copyChartSettings.call(this);
 
         //Define table object.
         prepareTable.call(this);

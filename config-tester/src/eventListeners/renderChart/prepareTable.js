@@ -1,7 +1,6 @@
 export default function prepareTable() {
     if (this.table && this.table.destroy) this.table.destroy();
-    else
-        this.containers.dataPreview.selectAll('*').remove();
+    else this.containers.dataPreview.selectAll('*').remove();
 
     this.table = new webCharts.createTable(this.containers.dataPreview.node());
     this.table.ct = this;

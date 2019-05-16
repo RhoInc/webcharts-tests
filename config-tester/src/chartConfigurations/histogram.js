@@ -5,12 +5,12 @@ export default function histogram() {
             type: 'linear',
             column: 'sepal width',
             label: 'Sepal Width',
-            bin: 25,
+            bin: 25
         },
         y: {
             type: 'linear',
             label: '# of Observations',
-            domain: [0,null],
+            domain: [0, null]
         },
         marks: [
             {
@@ -19,8 +19,8 @@ export default function histogram() {
                 summarizeY: 'count',
                 tooltip: '$y observations at $x',
                 attributes: {
-                    'fill-opacity': .75,
-                },
+                    'fill-opacity': 0.75
+                }
             }
         ],
         resizable: false

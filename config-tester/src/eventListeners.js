@@ -8,7 +8,7 @@ import callbacks from './eventListeners/callbacks';
 export default function eventListeners() {
     renderChart.call(this);
     chartConfigurationChange.call(this);
-    //dataChange.call(this);
+    dataChange.call(this);
     branchChange.call(this);
     settings.call(this);
     callbacks.call(this);
