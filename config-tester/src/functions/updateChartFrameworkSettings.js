@@ -1,4 +1,4 @@
-export default function updateSettings() {
+export default function updateChartFrameworkSettings() {
     this.containers.settings.forEach(container => {
         const d = container.datum();
         const json = JSON.stringify(this.settings[d.setting], null, 4);

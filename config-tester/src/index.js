@@ -2,7 +2,6 @@ import './util/polyfills';
 import init from './init';
 import layout from './layout';
 import styles from './styles';
-import eventListeners from './eventListeners';
 
 export default function configTester(
     element,
@@ -55,7 +54,6 @@ export default function configTester(
 
     layout.call(configTester);
     styles.call(configTester);
-    eventListeners.call(configTester);
 
     return configTester;
 }

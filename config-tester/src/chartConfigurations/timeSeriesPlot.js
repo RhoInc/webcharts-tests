@@ -1,6 +1,6 @@
 export default function timeSeriesPlot() {
     return {
-        data: './data/miscellaneous/climate-data.csv',
+        dataFile: './data/miscellaneous/climate-data.csv',
         x: {
             type: 'time',
             column: 'DATE',

@@ -128,7 +128,7 @@
 
     function horizontalBarChart() {
         return {
-            data: './data/miscellaneous/iris.csv',
+            dataFile: './data/miscellaneous/iris.csv',
             x: {
                 type: 'linear',
                 column: 'sepal width',
@@ -162,7 +162,7 @@
 
     function scatterPlot() {
         return {
-            data: './data/miscellaneous/iris.csv',
+            dataFile: './data/miscellaneous/iris.csv',
             x: {
                 type: 'linear',
                 column: 'sepal width',
@@ -195,7 +195,7 @@
 
     function timeSeriesPlot() {
         return {
-            data: './data/miscellaneous/climate-data.csv',
+            dataFile: './data/miscellaneous/climate-data.csv',
             x: {
                 type: 'time',
                 column: 'DATE',
@@ -231,7 +231,7 @@
 
     function verticalBarChart() {
         return {
-            data: './data/miscellaneous/iris.csv',
+            dataFile: './data/miscellaneous/iris.csv',
             x: {
                 type: 'ordinal',
                 column: 'species',
@@ -265,7 +265,7 @@
 
     function histogram() {
         return {
-            data: './data/miscellaneous/iris.csv',
+            dataFile: './data/miscellaneous/iris.csv',
             x: {
                 type: 'linear',
                 column: 'sepal width',
@@ -314,7 +314,7 @@
         });
     }
 
-    function loadData() {
+    function loadDataFiles() {
         return new Promise(function(resolve, reject) {
             var req = new XMLHttpRequest();
             req.open('GET', 'https://cdn.jsdelivr.net/gh/RhoInc/data-library/dataFiles.json', true);
@@ -340,7 +340,7 @@
         });
     }
 
-    function loadBranches() {
+    function loadWebchartsVersions() {
         return new Promise(function(resolve, reject) {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
@@ -366,7 +366,7 @@
         //Add chart configurations to chart configuration dropdown.
         this.chartConfigurations = chartConfigurations;
         this.chartConfiguration = chartConfigurations[0];
-        this.containers.controls.settings
+        this.containers.controls.chartConfiguration
             .selectAll('option')
             .data(chartConfigurations, function(d) {
                 return d.type;
@@ -378,31 +378,35 @@
             });
     }
 
-    function updateData(data) {
+    function updateDataFiles(dataFiles) {
         var _this = this;
 
         //Add data files to data dropdown.
-        this.data = data;
-        this.containers.controls.data
+        this.dataFiles = dataFiles;
+        this.dataFile = this.chartConfiguration.dataFile;
+        this.containers.controls.dataFile
             .selectAll('option')
-            .data(data)
+            .data(dataFiles)
             .enter()
             .append('option')
+            .attr('label', function(d) {
+                return d.rel_path.split('/').pop();
+            })
             .property('selected', function(d) {
-                return d.rel_path === _this.chartConfiguration.data;
+                return d.rel_path === _this.chartConfiguration.dataFile;
             })
             .text(function(d) {
                 return d.rel_path;
             });
     }
 
-    function updateBranches(branches) {
-        //Add Webcharts branches to branch dropdown.
-        if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
-        this.branches = branches;
-        this.containers.controls.branches
+    function updateWebchartswebchartsVersions(webchartsVersions) {
+        //Add Webcharts webchartsVersions to branch dropdown.
+        this.webchartsVersions = webchartsVersions;
+        this.branch = webchartsVersions[0];
+        this.containers.controls.webchartsVersion
             .selectAll('option')
-            .data(branches, function(d) {
+            .data(webchartsVersions, function(d) {
                 return d.commit ? d.commit.sha : d.name;
             })
             .enter()
@@ -412,19 +416,335 @@
             });
     }
 
-    var _typeof =
-        typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
-            ? function(obj) {
-                  return typeof obj;
-              }
-            : function(obj) {
-                  return obj &&
-                      typeof Symbol === 'function' &&
-                      obj.constructor === Symbol &&
-                      obj !== Symbol.prototype
-                      ? 'symbol'
-                      : typeof obj;
-              };
+    function loadData() {
+        return fetch(this.dataPath + '/' + this.dataFile)
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(text) {
+                return d3.csv.parse(text);
+            });
+    }
+
+    function onInit() {
+        if (this.data) {
+            this.config.cols = Object.keys(this.data.raw[0]).filter(function(key) {
+                return key !== 'index';
+            });
+            this.config.headers = this.config.cols.slice();
+        }
+    }
+
+    function onDraw() {
+        this.table.on('draw', function() {
+            var context = this;
+
+            //Allow cell editing.
+            this.tbody.selectAll('tr').each(function(d) {
+                var row = d3.select(this);
+
+                row.selectAll('td').each(function(di) {
+                    di.index = d.index;
+                    var cell = d3.select(this).text('');
+
+                    //Append div to cell with the contenteditable attribute.
+                    var contentEditable = cell
+                        .append('div')
+                        .attr('contenteditable', true)
+                        .text(di.text);
+
+                    //Update cell datum on input.
+                    contentEditable.on(
+                        /Trident/.test(navigator.userAgent) ? 'textinput' : 'input',
+                        function() {
+                            di.text = this.textContent;
+                        }
+                    );
+
+                    //Update table data on blue (when focus leaves cell).
+                    contentEditable.on('blur', function() {
+                        var datum = context.ct.data.find(function(dii) {
+                            return dii.index === di.index;
+                        });
+                        datum[di.col] = di.text;
+                        context.ct.chart.draw(context.ct.data);
+                    });
+                });
+            });
+        });
+    }
+
+    function initTable() {
+        if (this.table && this.table.destroy) this.table.destroy();
+        else this.containers.dataPreview.selectAll('*').remove();
+
+        this.table = new webCharts.createTable(this.containers.dataPreview.node());
+        this.table.ct = this;
+        this.table.on('init', onInit);
+        this.table.on('draw', onDraw);
+        this.table.init(this.data);
+    }
+
+    function copyChartSettings() {
+        var _this = this;
+
+        this.settings.chart = _.clone(this.chartConfiguration);
+        this.settings.x = this.settings.chart.x;
+        this.settings.y = this.settings.chart.y;
+        this.settings.marks = this.settings.chart.marks;
+        this.settings.general = Object.keys(this.settings.chart)
+            .filter(function(key) {
+                return ['type', 'data', 'x', 'y', 'marks'].indexOf(key) < 0;
+            })
+            .reduce(function(acc, cur) {
+                acc[cur] = _this.settings.chart[cur];
+                return acc;
+            }, {});
+    }
+
+    function initChart() {
+        var _this = this;
+
+        if (this.chart && this.chart.destroy) this.chart.destroy();
+        else this.containers.chart.selectAll('*').remove();
+        this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
+        this.chart.ct = this;
+
+        var context = this;
+
+        var _loop = function _loop(callback) {
+            _this.chart.on(callback, function() {
+                try {
+                    eval(context.callbacks[callback]);
+                } catch (error) {
+                    alert(
+                        "That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key."
+                    );
+                    console.error(error);
+                }
+            });
+        };
+
+        for (var callback in this.callbacks) {
+            _loop(callback);
+        }
+
+        this.chart.init(this.data);
+    }
+
+    function updateChartFrameworkSettings() {
+        var _this = this;
+
+        this.containers.settings.forEach(function(container) {
+            var d = container.datum();
+            var json = JSON.stringify(_this.settings[d.setting], null, 4);
+            container
+                .select('textarea')
+                .attr(
+                    'rows',
+                    ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null
+                )
+                .property('value', json)
+                .text(json);
+        });
+    }
+
+    function updateChartConfiguration(type) {
+        var options = this.containers.controls.chartConfiguration.selectAll('option');
+        if (type) {
+            options.property('selected', function(d) {
+                return d.type === type;
+            });
+        } else {
+            this.chartConfiguration = options
+                .filter(function() {
+                    return this.selected;
+                })
+                .datum();
+            this.dataFile = this.chartConfiguration.dataFile;
+        }
+    }
+
+    function updateDataFile(dataFile) {
+        var options = this.containers.controls.dataFile.selectAll('option');
+        if (dataFile)
+            options.property('selected', function(d) {
+                return d.rel_path === dataFile;
+            });
+        else
+            this.dataFile = options
+                .filter(function() {
+                    return this.selected;
+                })
+                .datum().rel_path;
+    }
+
+    function chartConfiguration() {
+        var _this = this;
+
+        this.containers.controls.chartConfiguration.on('change', function() {
+            updateChartConfiguration.call(_this);
+            updateDataFile.call(_this, _this.dataFile);
+            loadData.call(_this).then(function(data) {
+                _this.data = data;
+                initTable.call(_this);
+                copyChartSettings.call(_this);
+                initChart.call(_this);
+                updateChartFrameworkSettings.call(_this);
+            });
+        });
+    }
+
+    function dataFile() {
+        var _this = this;
+
+        this.containers.controls.dataFile.on('change', function() {
+            updateDataFile.call(_this);
+            loadData.call(_this).then(function(data) {
+                _this.data = data;
+                initTable.call(_this);
+            });
+        });
+    }
+
+    function updateWebchartsVersion(version) {
+        var options = this.containers.controls.webchartsVersion.selectAll('option');
+        if (version)
+            options.property('selected', function(d) {
+                return d.name === version;
+            });
+        else
+            this.webchartsVersion = options
+                .filter(function() {
+                    return this.selected;
+                })
+                .datum();
+    }
+
+    function webchartsVersion() {
+        var _this = this;
+
+        this.containers.controls.webchartsVersion.on('change', function() {
+            updateWebchartsVersion.call(_this);
+
+            var head = document.getElementsByTagName('head')[0];
+
+            //Load Webcharts .js file.
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src =
+                'https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@' +
+                _this.webchartsVersion.name +
+                '/build/webcharts.js';
+            head.appendChild(script);
+
+            //Disable Webcharts .css file.
+            var styleSheets = document.styleSheets;
+            for (var i in styleSheets) {
+                var styleSheet = styleSheets[i];
+                if (/webcharts\.(min\.)?css/.test(styleSheet.href)) styleSheet.disabled = true;
+            }
+
+            //Remove Webcharts .css file.
+            var links = head.querySelectorAll('link');
+            for (var _i in links) {
+                var _link = links[_i];
+                if (/webcharts\.(min\.)?css/.test(_link.href)) head.removeChild(_link);
+            }
+
+            //Load Webcharts .css file.
+            var link = document.createElement('link');
+            link.type = 'text/css';
+            link.rel = 'stylesheet';
+            link.href =
+                'https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@' +
+                _this.webchartsVersion.name +
+                '/css/webcharts.css';
+            head.appendChild(link);
+
+            //Redraw table and chart.
+            var webChartsLoading = setInterval(function() {
+                var webChartsExists = window.webCharts !== undefined;
+                if (webChartsExists) {
+                    clearInterval(webChartsLoading);
+                    try {
+                        initTable.call(_this);
+                        initChart.call(_this);
+                    } catch (err) {
+                        console.warn(err);
+                        context.containers.chart.text(
+                            'Webcharts version ' +
+                                _this.webchartsVersion.name +
+                                ' is experiencing technical difficulties.  Please select another version.'
+                        );
+                    }
+                }
+            }, 25);
+        });
+    }
+
+    function chartFrameworkSettings() {
+        var context = this;
+
+        this.containers.settings.forEach(function(container) {
+            container.select('textarea').on('change', function(d) {
+                var updatedSettings = JSON5.parse(this.value);
+
+                //Update x, y, and mark settings.
+                if (d.setting !== 'general') {
+                    context.settings[d.setting] = updatedSettings;
+                    context.settings.chart[d.setting] = updatedSettings;
+                }
+                //Update general settings.
+                else {
+                    var properties = Object.keys(updatedSettings).filter(function(key) {
+                        return ['x', 'y', 'marks'].indexOf(key) < 0;
+                    });
+                    properties.forEach(function(property) {
+                        var setting = updatedSettings[property];
+                        context.settings.general[property] = setting;
+                        context.settings.chart[property] = setting;
+                    });
+                }
+            });
+        });
+    }
+
+    function renderChart() {
+        var _this = this;
+
+        this.containers.controls.renderChart.on('click', function() {
+            //updateChartConfiguration.call(this);
+            //updateDataFile.call(this, this.dataFile);
+            //loadData.call(this)
+            //    .then(data => {
+            //this.data = data;
+            //initTable.call(this);
+            //copyChartSettings.call(this);
+            initChart.call(_this);
+            //updateChartFrameworkSettings.call(this);
+            //    });
+        });
+    }
+
+    function callbacks() {
+        var context = this;
+
+        this.containers.callbacks.forEach(function(container) {
+            container.select('textarea').on('change', function(d) {
+                context.callbacks[d.label] = this.value;
+            });
+        });
+    }
+
+    function defineEventListeners() {
+        chartConfiguration.call(this);
+        dataFile.call(this);
+        webchartsVersion.call(this);
+        chartFrameworkSettings.call(this);
+        renderChart.call(this);
+        callbacks.call(this);
+    }
 
     var slicedToArray = (function() {
         function sliceIterator(arr, i) {
@@ -468,27 +788,39 @@
         };
     })();
 
+    //load data
+
     function init() {
         var _this = this;
 
         Promise.all([
             loadChartConfigurations.call(this),
-            loadData.call(this),
-            loadBranches.call(this)
+            loadDataFiles.call(this),
+            loadWebchartsVersions.call(this)
         ]).then(function(values) {
             var _values = slicedToArray(values, 3),
                 chartConfigurations = _values[0],
-                data = _values[1],
-                branches = _values[2];
+                dataFiles = _values[1],
+                webchartsVersions = _values[2];
 
             updateChartConfigurations.call(_this, chartConfigurations);
-            updateData.call(_this, data);
-            updateBranches.call(
+            updateDataFiles.call(_this, dataFiles);
+            updateWebchartswebchartsVersions.call(
                 _this,
-                Array.isArray(branches) && branches.length ? branches : [{ name: 'master' }]
+                Array.isArray(webchartsVersions) && webchartsVersions.length
+                    ? webchartsVersions
+                    : [{ name: 'master' }]
             );
 
-            _this.containers.controls.render.node().click();
+            loadData.call(_this).then(function(data) {
+                _this.data = data;
+                initTable.call(_this);
+                copyChartSettings.call(_this);
+                initChart.call(_this);
+                updateChartFrameworkSettings.call(_this);
+            });
+
+            defineEventListeners.call(_this);
         });
     }
 
@@ -510,10 +842,10 @@
             .append('div')
             .classed('ct-control-div ct-control-div--buttons', true);
 
-        this.containers.renderControl = this.containers.buttons
+        this.containers.renderChartControl = this.containers.buttons
             .append('div')
             .classed('ct-control ct-control--render', true);
-        this.containers.controls.render = this.containers.renderControl
+        this.containers.controls.renderChart = this.containers.renderChartControl
             .append('button')
             .classed('ct-control__button', true)
             .text('Render Chart');
@@ -522,43 +854,47 @@
             .append('div')
             .classed('ct-control-div ct-control-div--dropdowns', true);
 
-        this.containers.settingsControl = this.containers.dropdowns
+        //chart configuration
+        this.containers.chartConfigurationControl = this.containers.dropdowns
             .append('div')
-            .classed('ct-control ct-control--settings', true);
-        this.containers.controls.settings = this.containers.settingsControl
+            .classed('ct-control ct-control--chart-configuration', true);
+        this.containers.controls.chartConfiguration = this.containers.chartConfigurationControl
             .append('select')
             .classed('ct-control__select', true);
-        this.containers.settingsControl
+        this.containers.chartConfigurationControl
             .append('span')
             .classed('ct-control__label', true)
             .text('Chart Configuration');
 
-        this.containers.dataControl = this.containers.dropdowns
+        //data file
+        this.containers.dataFileControl = this.containers.dropdowns
             .append('div')
-            .classed('ct-control ct-control--data', true);
-        this.containers.controls.data = this.containers.dataControl
+            .classed('ct-control ct-control--data-file', true);
+        this.containers.controls.dataFile = this.containers.dataFileControl
             .append('select')
             .classed('ct-control__select', true);
-        this.containers.dataControl
+        this.containers.dataFileControl
             .append('span')
             .classed('ct-control__label', true)
             .text('Select a data file or load a .csv:');
-        this.containers.dataSelect = this.containers.dataControl
+        this.containers.dataFileSelect = this.containers.dataFileControl
             .append('input')
             .classed('ct-control__input ct-control__input--file', true)
             .attr('type', 'file');
 
-        this.containers.branchesControl = this.containers.dropdowns
+        //webcharts versions
+        this.containers.webchartsVersionControl = this.containers.dropdowns
             .append('div')
-            .classed('ct-control ct-control--branches', true);
-        this.containers.controls.branches = this.containers.branchesControl
+            .classed('ct-control ct-control--webcharts-version', true);
+        this.containers.controls.webchartsVersion = this.containers.webchartsVersionControl
             .append('select')
             .classed('ct-control__select', true);
-        this.containers.branchesControl
+        this.containers.webchartsVersionControl
             .append('span')
             .classed('ct-control__label', true)
             .text('Webcharts Branch');
 
+        //data preview
         this.containers.dataPreviewContainer = this.containers.configuration
             .append('div')
             .classed('ct-control-div ct-data-preview', true);
@@ -666,7 +1002,7 @@
             });
     }
 
-    function callbacks() {
+    function callbacks$1() {
         var context = this;
 
         this.containers.callbacksContainer = this.containers.main
@@ -751,7 +1087,7 @@
     function layout() {
         configuration.call(this);
         chartFramework.call(this);
-        callbacks.call(this);
+        callbacks$1.call(this);
     }
 
     function styles() {
@@ -864,397 +1200,6 @@
         document.getElementsByTagName('head')[0].appendChild(style);
     }
 
-    function getConfiguration() {
-        var getChartConfiguration =
-            arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-
-        var _this = this;
-
-        var getData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-        var getBranch = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-        if (getChartConfiguration) {
-            this.chartConfiguration = this.containers.controls.settings
-                .select('option:checked')
-                .datum();
-        }
-
-        if (getData) {
-            this.dataFile = this.chartConfiguration.data;
-            this.containers.controls.data.selectAll('option').property('selected', function(d) {
-                return d.rel_path === _this.dataFile;
-            });
-        }
-
-        if (getBranch) {
-            this.branch = this.containers.controls.branches.select('option:checked').datum();
-        }
-    }
-
-    function copyChartSettings() {
-        var _this = this;
-
-        this.settings.chart = _.clone(this.chartConfiguration);
-        this.settings.x = this.settings.chart.x;
-        this.settings.y = this.settings.chart.y;
-        this.settings.marks = this.settings.chart.marks;
-        this.settings.general = Object.keys(this.settings.chart)
-            .filter(function(key) {
-                return ['type', 'data', 'x', 'y', 'marks'].indexOf(key) < 0;
-            })
-            .reduce(function(acc, cur) {
-                acc[cur] = _this.settings.chart[cur];
-                return acc;
-            }, {});
-    }
-
-    function prepareTable() {
-        if (this.table && this.table.destroy) this.table.destroy();
-        else this.containers.dataPreview.selectAll('*').remove();
-
-        this.table = new webCharts.createTable(this.containers.dataPreview.node());
-        this.table.ct = this;
-
-        //on init()
-        this.table.on('init', function() {
-            if (this.data) {
-                this.config.cols = Object.keys(this.data.raw[0]).filter(function(key) {
-                    return key !== 'index';
-                });
-                this.config.headers = this.config.cols.slice();
-            }
-        });
-
-        //on draw()
-        this.table.on('draw', function() {
-            var context = this;
-
-            //Allow cell editing.
-            this.tbody.selectAll('tr').each(function(d) {
-                var row = d3.select(this);
-
-                row.selectAll('td').each(function(di) {
-                    di.index = d.index;
-                    var cell = d3.select(this).text('');
-
-                    //Append div to cell with the contenteditable attribute.
-                    var contentEditable = cell
-                        .append('div')
-                        .attr('contenteditable', true)
-                        .text(di.text);
-
-                    //Update cell datum on input.
-                    contentEditable.on(
-                        /Trident/.test(navigator.userAgent) ? 'textinput' : 'input',
-                        function() {
-                            di.text = this.textContent;
-                        }
-                    );
-
-                    //Update table data on blue (when focus leaves cell).
-                    contentEditable.on('blur', function() {
-                        var datum = context.ct.data.find(function(dii) {
-                            return dii.index === di.index;
-                        });
-                        datum[di.col] = di.text;
-                        context.ct.chart.draw(context.ct.data);
-                    });
-                });
-            });
-        });
-    }
-
-    function prepareChart() {
-        if (this.chart && this.chart.destroy) this.chart.destroy();
-        else this.containers.chart.selectAll('*').remove();
-
-        this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
-        this.chart.ct = this;
-    }
-
-    function updateSettings() {
-        var _this = this;
-
-        this.containers.settings.forEach(function(container) {
-            var d = container.datum();
-            var json = JSON.stringify(_this.settings[d.setting], null, 4);
-            container
-                .select('textarea')
-                .attr(
-                    'rows',
-                    ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null
-                )
-                .property('value', json)
-                .text(json);
-        });
-    }
-
-    function init$1() {
-        var table = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-
-        var _this = this;
-
-        var chart = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-        var loadData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-        if (loadData)
-            d3.csv(
-                this.dataPath + '/' + this.dataFile,
-                function(d, i) {
-                    d.index = i;
-                    return d;
-                },
-                function(data) {
-                    _this.data = data;
-                    if (table) _this.table.init(data);
-                    if (chart) _this.chart.init(data);
-                }
-            );
-        else {
-            if (table) this.table.init(this.data);
-            if (chart) this.chart.init(this.data);
-        }
-    }
-
-    function renderChart() {
-        var _this = this;
-
-        this.containers.controls.render.on('click', function() {
-            //reset.call(this);
-
-            //Get current dropdown selections.
-            getConfiguration.call(_this);
-
-            //Copy chart settings.
-            copyChartSettings.call(_this);
-
-            //Define table object.
-            prepareTable.call(_this);
-
-            //Define chart object.
-            prepareChart.call(_this);
-
-            //Update settings textareas.
-            updateSettings.call(_this);
-
-            //Read in data and initialize table and chart.
-            init$1.call(_this);
-        });
-    }
-
-    function chartConfigurationChange() {
-        var context = this;
-
-        this.containers.controls.settings.on('change', function() {
-            context.containers.controls.render.node().click();
-        });
-    }
-
-    function dataChange() {
-        var _this = this;
-
-        this.containers.controls.data.on('change', function() {
-            _this.dataFile = _this.containers.controls.data.selectAll('option:checked').text();
-            console.log(_this.dataFile);
-            //Get current dropdown selections.
-            //getConfiguration.call(this, false, true, false);
-
-            //Define table object.
-            prepareTable.call(_this);
-
-            //Initialize table.
-            init$1.call(_this, true, false);
-        });
-    }
-
-    function branchChange() {
-        var context = this;
-
-        this.containers.branchesControl.on('change', function() {
-            delete window.webCharts;
-
-            var d = d3
-                .select(this)
-                .select('option:checked')
-                .datum();
-            this.branch = d.name;
-            var head = document.getElementsByTagName('head')[0];
-
-            //Load Webcharts .js file.
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src =
-                'https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@' + d.name + '/build/webcharts.js';
-            head.appendChild(script);
-
-            //Disable Webcharts .css file.
-            var styleSheets = document.styleSheets;
-            for (var i in styleSheets) {
-                var styleSheet = styleSheets[i];
-                if (/webcharts\.(min\.)?css/.test(styleSheet.href)) styleSheet.disabled = true;
-            }
-
-            //Remove Webcharts .css file.
-            var links = head.querySelectorAll('link');
-            for (var _i in links) {
-                var _link = links[_i];
-                if (/webcharts\.(min\.)?css/.test(_link.href)) head.removeChild(_link);
-            }
-
-            //Load Webcharts .css file.
-            var link = document.createElement('link');
-            link.type = 'text/css';
-            link.rel = 'stylesheet';
-            link.href =
-                'https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@' + d.name + '/css/webcharts.css';
-            head.appendChild(link);
-
-            //Redraw table and chart.
-            var webChartsLoading = setInterval(function() {
-                var webChartsExists = window.webCharts !== undefined;
-                if (webChartsExists) {
-                    clearInterval(webChartsLoading);
-                    try {
-                        prepareTable.call(context);
-                        prepareChart.call(context);
-                        init$1.call(context, true, true, context.data === undefined);
-                    } catch (err) {
-                        console.warn(err);
-                        context.containers.chart.text(
-                            'Webcharts branch ' +
-                                d.name +
-                                ' is experiencing technical difficulties.  Please select another branch or version.'
-                        );
-                    }
-                }
-            }, 25);
-        });
-    }
-
-    function settings() {
-        var context = this;
-
-        this.containers.settings.forEach(function(container) {
-            container.select('textarea').on('change', function(d) {
-                var updatedSettings = JSON5.parse(this.value);
-
-                //Update x, y, and mark settings.
-                if (d.setting !== 'general') {
-                    context.settings[d.setting] = updatedSettings;
-                    context.settings.chart[d.setting] = updatedSettings;
-                    context.chart.config[d.setting] = updatedSettings;
-                }
-                //Update general settings.
-                else {
-                    var properties = Object.keys(updatedSettings).filter(function(key) {
-                        return ['x', 'y', 'marks'].indexOf(key) < 0;
-                    });
-                    properties.forEach(function(property) {
-                        var setting = updatedSettings[property];
-                        context.settings.general[property] = setting;
-                        context.settings.chart[property] = setting;
-                        context.chart.config[property] = setting;
-                    });
-                }
-
-                context.chart.draw();
-            });
-        });
-    }
-
-    function clone(obj) {
-        var copy = void 0;
-
-        //boolean, number, string, null, undefined
-        if ('object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) || null == obj)
-            return obj;
-
-        //date
-        if (obj instanceof Date) {
-            copy = new Date();
-            copy.setTime(obj.getTime());
-            return copy;
-        }
-
-        //array
-        if (obj instanceof Array) {
-            copy = [];
-            for (var i = 0, len = obj.length; i < len; i++) {
-                copy[i] = clone(obj[i]);
-            }
-            return copy;
-        }
-
-        //object
-        if (obj instanceof Object) {
-            copy = {};
-            for (var attr in obj) {
-                if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
-            }
-            return copy;
-        }
-
-        throw new Error('Unable to copy [obj]! Its type is not supported.');
-    }
-
-    function callbacks$1() {
-        var context = this;
-
-        this.containers.callbacks.forEach(function(container) {
-            container.select('textarea').on('change', function(d) {
-                context.callbacks[d.label] = this.value;
-
-                context.chart.on(d.label, function() {
-                    try {
-                        eval(context.callbacks[d.label]);
-                    } catch (error) {
-                        alert(
-                            "That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key."
-                        );
-                        console.error(error);
-                    }
-                });
-
-                if (['init', 'layout', 'destroy'].indexOf(d.label) < 0) context.chart.draw();
-                else {
-                    console.log('reinitialized');
-                    context.chart.destroy();
-                    context.chart = webCharts.createChart(
-                        context.containers.chart.node(),
-                        context.settings.chart
-                    );
-
-                    var _loop = function _loop(callback) {
-                        context.chart.on(callback, function() {
-                            try {
-                                eval(context.callbacks[callback]);
-                            } catch (error) {
-                                alert(
-                                    "That's bad code right there pardner.  Check the console to see where you went astray by hitting the F12 key."
-                                );
-                                console.error(error);
-                            }
-                        });
-                    };
-
-                    for (var callback in context.callbacks) {
-                        _loop(callback);
-                    }
-                    context.chart.init(clone(context.data));
-                }
-            });
-        });
-    }
-
-    function eventListeners() {
-        renderChart.call(this);
-        chartConfigurationChange.call(this);
-        dataChange.call(this);
-        branchChange.call(this);
-        settings.call(this);
-        callbacks$1.call(this);
-    }
-
     function configTester(element) {
         var dataPath =
             arguments.length > 1 && arguments[1] !== undefined
@@ -1308,7 +1253,6 @@
 
         layout.call(configTester);
         styles.call(configTester);
-        eventListeners.call(configTester);
 
         return configTester;
     }

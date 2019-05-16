@@ -1,25 +1,19 @@
-import getConfiguration from './renderChart/getConfiguration';
-import prepareTable from './renderChart/prepareTable';
-import prepareChart from './renderChart/prepareChart';
-import init from './renderChart/init';
+import updateWebchartsVersion from '../../functions/updateWebchartsVersion';
+import initTable from '../../functions/initTable';
+import initChart from '../../functions/initChart';
 
-export default function branchChange() {
-    const context = this;
+export default function webchartsVersion() {
+    this.containers.controls.webchartsVersion.on('change', () => {
+        updateWebchartsVersion.call(this);
 
-    this.containers.branchesControl.on('change', function() {
-        delete window.webCharts;
-
-        const d = d3
-            .select(this)
-            .select('option:checked')
-            .datum();
-        this.branch = d.name;
         const head = document.getElementsByTagName('head')[0];
 
         //Load Webcharts .js file.
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${d.name}/build/webcharts.js`;
+        script.src = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${
+            this.webchartsVersion.name
+        }/build/webcharts.js`;
         head.appendChild(script);
 
         //Disable Webcharts .css file.
@@ -40,7 +34,9 @@ export default function branchChange() {
         const link = document.createElement('link');
         link.type = 'text/css';
         link.rel = 'stylesheet';
-        link.href = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${d.name}/css/webcharts.css`;
+        link.href = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${
+            this.webchartsVersion.name
+        }/css/webcharts.css`;
         head.appendChild(link);
 
         //Redraw table and chart.
@@ -49,15 +45,14 @@ export default function branchChange() {
             if (webChartsExists) {
                 clearInterval(webChartsLoading);
                 try {
-                    prepareTable.call(context);
-                    prepareChart.call(context);
-                    init.call(context, true, true, context.data === undefined);
+                    initTable.call(this);
+                    initChart.call(this);
                 } catch (err) {
                     console.warn(err);
                     context.containers.chart.text(
-                        `Webcharts branch ${
-                            d.name
-                        } is experiencing technical difficulties.  Please select another branch or version.`
+                        `Webcharts version ${
+                            this.webchartsVersion.name
+                        } is experiencing technical difficulties.  Please select another version.`
                     );
                 }
             }
