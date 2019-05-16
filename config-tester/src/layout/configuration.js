@@ -28,43 +28,47 @@ export default function configuration() {
         .append('div')
         .classed('ct-control-div ct-control-div--dropdowns', true);
 
-    this.containers.settingsControl = this.containers.dropdowns
+    //chart configuration
+    this.containers.chartConfigurationControl = this.containers.dropdowns
         .append('div')
-        .classed('ct-control ct-control--settings', true);
-    this.containers.controls.settings = this.containers.settingsControl
+        .classed('ct-control ct-control--chart-configuration', true);
+    this.containers.controls.chartConfiguration = this.containers.chartConfigurationControl
         .append('select')
         .classed('ct-control__select', true);
-    this.containers.settingsControl
+    this.containers.chartConfigurationControl
         .append('span')
         .classed('ct-control__label', true)
         .text('Chart Configuration');
 
-    this.containers.dataControl = this.containers.dropdowns
+    //data file
+    this.containers.dataFileControl = this.containers.dropdowns
         .append('div')
-        .classed('ct-control ct-control--data', true);
-    this.containers.controls.data = this.containers.dataControl
+        .classed('ct-control ct-control--data-file', true);
+    this.containers.controls.dataFile = this.containers.dataFileControl
         .append('select')
         .classed('ct-control__select', true);
-    this.containers.dataControl
+    this.containers.dataFileControl
         .append('span')
         .classed('ct-control__label', true)
         .text('Select a data file or load a .csv:');
-    this.containers.dataSelect = this.containers.dataControl
+    this.containers.dataFileSelect = this.containers.dataFileControl
         .append('input')
         .classed('ct-control__input ct-control__input--file', true)
         .attr('type', 'file');
 
-    this.containers.branchesControl = this.containers.dropdowns
+    //webcharts versions
+    this.containers.webchartsVersionControl = this.containers.dropdowns
         .append('div')
-        .classed('ct-control ct-control--branches', true);
-    this.containers.controls.branches = this.containers.branchesControl
+        .classed('ct-control ct-control--webcharts-version', true);
+    this.containers.controls.webchartsVersion = this.containers.webchartsVersionControl
         .append('select')
         .classed('ct-control__select', true);
-    this.containers.branchesControl
+    this.containers.webchartsVersionControl
         .append('span')
         .classed('ct-control__label', true)
         .text('Webcharts Branch');
 
+    //data preview
     this.containers.dataPreviewContainer = this.containers.configuration
         .append('div')
         .classed('ct-control-div ct-data-preview', true);

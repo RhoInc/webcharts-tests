@@ -1,4 +1,4 @@
-export default function loadData() {
+export default function loadDataFiles() {
     const context = this;
 
     return new Promise(function(resolve, reject) {

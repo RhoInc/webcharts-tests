@@ -6,10 +6,10 @@ import settings from './eventListeners/settings';
 import callbacks from './eventListeners/callbacks';
 
 export default function eventListeners() {
-    renderChart.call(this);
-    chartConfigurationChange.call(this);
-    dataChange.call(this);
-    branchChange.call(this);
-    settings.call(this);
-    callbacks.call(this);
+    //renderChart.call(this);
+    //chartConfigurationChange.call(this);
+    //dataChange.call(this);
+    //branchChange.call(this);
+    //settings.call(this);
+    //callbacks.call(this);
 }

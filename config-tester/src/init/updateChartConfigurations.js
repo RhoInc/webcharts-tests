@@ -2,7 +2,7 @@ export default function updateChartConfigurations(chartConfigurations) {
     //Add chart configurations to chart configuration dropdown.
     this.chartConfigurations = chartConfigurations;
     this.chartConfiguration = chartConfigurations[0];
-    this.containers.controls.settings
+    this.containers.controls.chartConfiguration
         .selectAll('option')
         .data(chartConfigurations, d => d.type)
         .enter()

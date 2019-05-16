@@ -1,4 +1,4 @@
-export default function loadBranches() {
+export default function loadWebchartsVersions() {
     const context = this;
 
     return new Promise(function(resolve, reject) {
