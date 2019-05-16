@@ -362,6 +362,56 @@
         });
     }
 
+    function updateChartConfigurations(chartConfigurations) {
+        //Add chart configurations to chart configuration dropdown.
+        this.chartConfigurations = chartConfigurations;
+        this.chartConfiguration = chartConfigurations[0];
+        this.containers.controls.settings
+            .selectAll('option')
+            .data(chartConfigurations, function(d) {
+                return d.type;
+            })
+            .enter()
+            .append('option')
+            .text(function(d) {
+                return d.type;
+            });
+    }
+
+    function updateData(data) {
+        var _this = this;
+
+        //Add data files to data dropdown.
+        this.data = data;
+        this.containers.controls.data
+            .selectAll('option')
+            .data(data)
+            .enter()
+            .append('option')
+            .property('selected', function(d) {
+                return d.rel_path === _this.chartConfiguration.data;
+            })
+            .text(function(d) {
+                return d.rel_path;
+            });
+    }
+
+    function updateBranches(branches) {
+        //Add Webcharts branches to branch dropdown.
+        if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
+        this.branches = branches;
+        this.containers.controls.branches
+            .selectAll('option')
+            .data(branches, function(d) {
+                return d.commit ? d.commit.sha : d.name;
+            })
+            .enter()
+            .append('option')
+            .text(function(d) {
+                return d.name;
+            });
+    }
+
     var _typeof =
         typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
             ? function(obj) {
@@ -419,9 +469,8 @@
     })();
 
     function init() {
-        var context = this;
+        var _this = this;
 
-        //Add data-library data to data dropdown.
         Promise.all([
             loadChartConfigurations.call(this),
             loadData.call(this),
@@ -432,60 +481,18 @@
                 data = _values[1],
                 branches = _values[2];
 
-            //Add chart configurations to chart configuration dropdown.
+            updateChartConfigurations.call(_this, chartConfigurations);
+            updateData.call(_this, data);
+            updateBranches.call(
+                _this,
+                Array.isArray(branches) && branches.length ? branches : [{ name: 'master' }]
+            );
 
-            context.chartConfigurations = chartConfigurations;
-            context.chartConfiguration = chartConfigurations[0];
-            context.containers.controls.settings
-                .selectAll('option')
-                .data(chartConfigurations, function(d) {
-                    return d.type;
-                })
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.type;
-                });
-
-            //Add data files to data dropdown.
-            context.data = data;
-            context.containers.controls.data
-                .selectAll('option')
-                .data(data)
-                .enter()
-                .append('option')
-                .property('selected', function(d) {
-                    return d.rel_path === context.chartConfiguration.data;
-                })
-                .text(function(d) {
-                    return d.rel_path;
-                });
-
-            //Add Webcharts branches to branch dropdown.
-            if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
-            context.branches = branches;
-            context.containers.controls.branches
-                .selectAll('option')
-                .data(branches, function(d) {
-                    return d.commit ? d.commit.sha : d.name;
-                })
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.name;
-                });
-
-            context.containers.controls.render.node().click();
+            _this.containers.controls.render.node().click();
         });
     }
 
-    function layout() {
-        var context = this;
-
-        /**-------------------------------------------------------------------------------------------\
-        Configuration
-        \-------------------------------------------------------------------------------------------**/
-
+    function configuration() {
         this.containers.configuration = this.containers.main
             .append('div')
             .classed('ct-row ct-row--top ct-configuration', true);
@@ -563,10 +570,10 @@
         this.containers.dataPreview = this.containers.dataPreviewContainer
             .append('div')
             .classed('ct-data-preview__table', true);
+    }
 
-        /**-------------------------------------------------------------------------------------------\
-        Chart framework
-        \-------------------------------------------------------------------------------------------**/
+    function chartFramework() {
+        var context = this;
 
         this.containers.chartFramework = this.containers.main
             .append('div')
@@ -657,10 +664,10 @@
                         .classed('ct-component__textarea', true);
                 }
             });
+    }
 
-        /**-------------------------------------------------------------------------------------------\
-        Callbacks
-        \-------------------------------------------------------------------------------------------**/
+    function callbacks() {
+        var context = this;
 
         this.containers.callbacksContainer = this.containers.main
             .append('div')
@@ -739,6 +746,12 @@
                     .classed('ct-component__description', true)
                     .text(d.description);
             });
+    }
+
+    function layout() {
+        configuration.call(this);
+        chartFramework.call(this);
+        callbacks.call(this);
     }
 
     function styles() {
@@ -1184,7 +1197,7 @@
         throw new Error('Unable to copy [obj]! Its type is not supported.');
     }
 
-    function callbacks() {
+    function callbacks$1() {
         var context = this;
 
         this.containers.callbacks.forEach(function(container) {
@@ -1239,7 +1252,7 @@
         dataChange.call(this);
         branchChange.call(this);
         settings.call(this);
-        callbacks.call(this);
+        callbacks$1.call(this);
     }
 
     function configTester(element) {
