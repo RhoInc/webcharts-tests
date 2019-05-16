@@ -3,7 +3,7 @@
         ? (module.exports = factory())
         : typeof define === 'function' && define.amd
             ? define(factory)
-            : (global.configTester = factory());
+            : ((global = global || self), (global.configTester = factory()));
 })(this, function() {
     'use strict';
 
@@ -128,7 +128,7 @@
 
     function horizontalBarChart() {
         return {
-            data: './data/iris.csv',
+            data: './data/miscellaneous/iris.csv',
             x: {
                 type: 'linear',
                 column: 'sepal width',
@@ -162,7 +162,7 @@
 
     function scatterPlot() {
         return {
-            data: './data/iris.csv',
+            data: './data/miscellaneous/iris.csv',
             x: {
                 type: 'linear',
                 column: 'sepal width',
@@ -195,7 +195,7 @@
 
     function timeSeriesPlot() {
         return {
-            data: './data/climate_data.csv',
+            data: './data/miscellaneous/climate-data.csv',
             x: {
                 type: 'time',
                 column: 'DATE',
@@ -204,7 +204,7 @@
             y: {
                 type: 'linear',
                 column: 'Monthly Mean',
-                label: 'Mean Temperature?'
+                label: 'Mean Temperature'
             },
             marks: [
                 {
@@ -224,13 +224,14 @@
                 label: 'Measurement Location',
                 location: 'top'
             },
+            date_format: '%Y%m',
             resizable: false
         };
     }
 
     function verticalBarChart() {
         return {
-            data: './data/iris.csv',
+            data: './data/miscellaneous/iris.csv',
             x: {
                 type: 'ordinal',
                 column: 'species',
@@ -262,11 +263,41 @@
         };
     }
 
+    function histogram() {
+        return {
+            data: './data/miscellaneous/iris.csv',
+            x: {
+                type: 'linear',
+                column: 'sepal width',
+                label: 'Sepal Width',
+                bin: 25
+            },
+            y: {
+                type: 'linear',
+                label: '# of Observations',
+                domain: [0, null]
+            },
+            marks: [
+                {
+                    type: 'bar',
+                    per: ['sepal width'],
+                    summarizeY: 'count',
+                    tooltip: '$y observations at $x',
+                    attributes: {
+                        'fill-opacity': 0.75
+                    }
+                }
+            ],
+            resizable: false
+        };
+    }
+
     var chartConfigurations = {
         horizontalBarChart: horizontalBarChart,
         scatterPlot: scatterPlot,
         timeSeriesPlot: timeSeriesPlot,
-        verticalBarChart: verticalBarChart
+        verticalBarChart: verticalBarChart,
+        histogram: histogram
     };
 
     function loadChartConfigurations() {
@@ -286,11 +317,7 @@
     function loadData() {
         return new Promise(function(resolve, reject) {
             var req = new XMLHttpRequest();
-            req.open(
-                'GET',
-                'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json',
-                true
-            );
+            req.open('GET', 'https://cdn.jsdelivr.net/gh/RhoInc/data-library/dataFiles.json', true);
             req.onload = function() {
                 if (req.status == 200)
                     resolve(
@@ -335,67 +362,137 @@
         });
     }
 
-    function init() {
-        var context = this;
+    function updateChartConfigurations(chartConfigurations) {
+        //Add chart configurations to chart configuration dropdown.
+        this.chartConfigurations = chartConfigurations;
+        this.chartConfiguration = chartConfigurations[0];
+        this.containers.controls.settings
+            .selectAll('option')
+            .data(chartConfigurations, function(d) {
+                return d.type;
+            })
+            .enter()
+            .append('option')
+            .text(function(d) {
+                return d.type;
+            });
+    }
 
-        //Add viz-library data to data dropdown.
-        loadChartConfigurations.call(this).then(function(chartConfigurations) {
-            context.chartConfigurations = chartConfigurations;
-            context.containers.controls.settings
-                .selectAll('option')
-                .data(chartConfigurations, function(d) {
-                    return d.type;
-                })
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.type;
-                });
+    function updateData(data) {
+        var _this = this;
 
-            return chartConfigurations;
-        });
+        //Add data files to data dropdown.
+        this.data = data;
+        this.containers.controls.data
+            .selectAll('option')
+            .data(data)
+            .enter()
+            .append('option')
+            .property('selected', function(d) {
+                return d.rel_path === _this.chartConfiguration.data;
+            })
+            .text(function(d) {
+                return d.rel_path;
+            });
+    }
 
-        //Add viz-library data to data dropdown.
-        loadData.call(this).then(function(data) {
-            context.data = data;
-            context.containers.controls.data
-                .selectAll('option')
-                .data(data)
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.rel_path;
-                });
-
-            return data;
-        });
-
+    function updateBranches(branches) {
         //Add Webcharts branches to branch dropdown.
-        loadBranches.call(this).then(function(branches) {
-            if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
-            context.branches = branches;
-            context.containers.controls.branches
-                .selectAll('option')
-                .data(branches, function(d) {
-                    return d.commit ? d.commit.sha : d.name;
-                })
-                .enter()
-                .append('option')
-                .text(function(d) {
-                    return d.name;
-                });
+        if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
+        this.branches = branches;
+        this.containers.controls.branches
+            .selectAll('option')
+            .data(branches, function(d) {
+                return d.commit ? d.commit.sha : d.name;
+            })
+            .enter()
+            .append('option')
+            .text(function(d) {
+                return d.name;
+            });
+    }
 
-            return branches;
+    var _typeof =
+        typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
+            ? function(obj) {
+                  return typeof obj;
+              }
+            : function(obj) {
+                  return obj &&
+                      typeof Symbol === 'function' &&
+                      obj.constructor === Symbol &&
+                      obj !== Symbol.prototype
+                      ? 'symbol'
+                      : typeof obj;
+              };
+
+    var slicedToArray = (function() {
+        function sliceIterator(arr, i) {
+            var _arr = [];
+            var _n = true;
+            var _d = false;
+            var _e = undefined;
+
+            try {
+                for (
+                    var _i = arr[Symbol.iterator](), _s;
+                    !(_n = (_s = _i.next()).done);
+                    _n = true
+                ) {
+                    _arr.push(_s.value);
+
+                    if (i && _arr.length === i) break;
+                }
+            } catch (err) {
+                _d = true;
+                _e = err;
+            } finally {
+                try {
+                    if (!_n && _i['return']) _i['return']();
+                } finally {
+                    if (_d) throw _e;
+                }
+            }
+
+            return _arr;
+        }
+
+        return function(arr, i) {
+            if (Array.isArray(arr)) {
+                return arr;
+            } else if (Symbol.iterator in Object(arr)) {
+                return sliceIterator(arr, i);
+            } else {
+                throw new TypeError('Invalid attempt to destructure non-iterable instance');
+            }
+        };
+    })();
+
+    function init() {
+        var _this = this;
+
+        Promise.all([
+            loadChartConfigurations.call(this),
+            loadData.call(this),
+            loadBranches.call(this)
+        ]).then(function(values) {
+            var _values = slicedToArray(values, 3),
+                chartConfigurations = _values[0],
+                data = _values[1],
+                branches = _values[2];
+
+            updateChartConfigurations.call(_this, chartConfigurations);
+            updateData.call(_this, data);
+            updateBranches.call(
+                _this,
+                Array.isArray(branches) && branches.length ? branches : [{ name: 'master' }]
+            );
+
+            _this.containers.controls.render.node().click();
         });
     }
 
-    function layout() {
-        var context = this;
-
-        /**-------------------------------------------------------------------------------------------\
-        Configuration
-        \-------------------------------------------------------------------------------------------**/
-
+    function configuration() {
         this.containers.configuration = this.containers.main
             .append('div')
             .classed('ct-row ct-row--top ct-configuration', true);
@@ -466,17 +563,17 @@
             .append('div')
             .classed('ct-control-div ct-data-preview', true);
 
-        this.containers.dataPreview = this.containers.dataPreviewContainer
+        this.containers.dataPreviewContainer
             .append('h3')
             .classed('ct-data-preview__header', true)
             .text('Data Preview');
         this.containers.dataPreview = this.containers.dataPreviewContainer
             .append('div')
             .classed('ct-data-preview__table', true);
+    }
 
-        /**-------------------------------------------------------------------------------------------\
-        Chart framework
-        \-------------------------------------------------------------------------------------------**/
+    function chartFramework() {
+        var context = this;
 
         this.containers.chartFramework = this.containers.main
             .append('div')
@@ -567,10 +664,10 @@
                         .classed('ct-component__textarea', true);
                 }
             });
+    }
 
-        /**-------------------------------------------------------------------------------------------\
-        Callbacks
-        \-------------------------------------------------------------------------------------------**/
+    function callbacks() {
+        var context = this;
 
         this.containers.callbacksContainer = this.containers.main
             .append('div')
@@ -649,6 +746,12 @@
                     .classed('ct-component__description', true)
                     .text(d.description);
             });
+    }
+
+    function layout() {
+        configuration.call(this);
+        chartFramework.call(this);
+        callbacks.call(this);
     }
 
     function styles() {
@@ -788,18 +891,38 @@
         }
     }
 
+    function copyChartSettings() {
+        var _this = this;
+
+        this.settings.chart = _.clone(this.chartConfiguration);
+        this.settings.x = this.settings.chart.x;
+        this.settings.y = this.settings.chart.y;
+        this.settings.marks = this.settings.chart.marks;
+        this.settings.general = Object.keys(this.settings.chart)
+            .filter(function(key) {
+                return ['type', 'data', 'x', 'y', 'marks'].indexOf(key) < 0;
+            })
+            .reduce(function(acc, cur) {
+                acc[cur] = _this.settings.chart[cur];
+                return acc;
+            }, {});
+    }
+
     function prepareTable() {
-        if (this.table) this.table.destroy();
+        if (this.table && this.table.destroy) this.table.destroy();
+        else this.containers.dataPreview.selectAll('*').remove();
 
         this.table = new webCharts.createTable(this.containers.dataPreview.node());
         this.table.ct = this;
 
         //on init()
         this.table.on('init', function() {
-            this.config.cols = Object.keys(this.data.raw[0]).filter(function(key) {
-                return key !== 'index';
-            });
-            this.config.headers = this.config.cols.slice();
+            if (this.data) {
+                this.config.cols = Object.keys(this.data.raw[0]).filter(function(key) {
+                    return key !== 'index';
+                });
+                this.config.headers = this.config.cols.slice();
+            }
         });
 
         //on draw()
@@ -842,22 +965,9 @@
     }
 
     function prepareChart() {
-        var _this = this;
+        if (this.chart && this.chart.destroy) this.chart.destroy();
+        else this.containers.chart.selectAll('*').remove();
 
-        if (this.chart) this.chart.destroy();
-
-        this.settings.chart = this.chartConfiguration;
-        this.settings.general = Object.keys(this.settings.chart)
-            .filter(function(key) {
-                return ['data', 'x', 'y', 'marks'].indexOf(key) < 0;
-            })
-            .reduce(function(acc, cur) {
-                acc[cur] = _this.settings.chart[cur];
-                return acc;
-            }, {});
-        this.settings.y = this.settings.chart.y;
-        this.settings.marks = this.settings.chart.marks;
-        this.settings.x = this.settings.chart.x;
         this.chart = new webCharts.createChart(this.containers.chart.node(), this.settings.chart);
         this.chart.ct = this;
     }
@@ -870,18 +980,22 @@
             var json = JSON.stringify(_this.settings[d.setting], null, 4);
             container
                 .select('textarea')
-                .text(JSON.stringify(_this.settings[d.setting], null, 4))
                 .attr(
                     'rows',
                     ['general', 'x'].indexOf(d.setting) > -1 ? json.split('\n').length : null
-                );
+                )
+                .property('value', json)
+                .text(json);
         });
     }
 
     function init$1() {
+        var table = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
         var _this = this;
 
-        var loadData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+        var chart = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+        var loadData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
         if (loadData)
             d3.csv(
@@ -892,13 +1006,13 @@
                 },
                 function(data) {
                     _this.data = data;
-                    _this.table.init(data);
-                    _this.chart.init(data);
+                    if (table) _this.table.init(data);
+                    if (chart) _this.chart.init(data);
                 }
             );
         else {
-            this.table.init(this.data);
-            this.chart.init(this.data);
+            if (table) this.table.init(this.data);
+            if (chart) this.chart.init(this.data);
         }
     }
 
@@ -906,8 +1020,13 @@
         var _this = this;
 
         this.containers.controls.render.on('click', function() {
+            //reset.call(this);
+
             //Get current dropdown selections.
             getConfiguration.call(_this);
+
+            //Copy chart settings.
+            copyChartSettings.call(_this);
 
             //Define table object.
             prepareTable.call(_this);
@@ -920,6 +1039,31 @@
 
             //Read in data and initialize table and chart.
             init$1.call(_this);
+        });
+    }
+
+    function chartConfigurationChange() {
+        var context = this;
+
+        this.containers.controls.settings.on('change', function() {
+            context.containers.controls.render.node().click();
+        });
+    }
+
+    function dataChange() {
+        var _this = this;
+
+        this.containers.controls.data.on('change', function() {
+            _this.dataFile = _this.containers.controls.data.selectAll('option:checked').text();
+            console.log(_this.dataFile);
+            //Get current dropdown selections.
+            //getConfiguration.call(this, false, true, false);
+
+            //Define table object.
+            prepareTable.call(_this);
+
+            //Initialize table.
+            init$1.call(_this, true, false);
         });
     }
 
@@ -940,7 +1084,7 @@
             var script = document.createElement('script');
             script.type = 'text/javascript';
             script.src =
-                'https://cdn.rawgit.com/RhoInc/Webcharts/' + d.name + '/build/webcharts.js';
+                'https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@' + d.name + '/build/webcharts.js';
             head.appendChild(script);
 
             //Disable Webcharts .css file.
@@ -957,11 +1101,12 @@
                 if (/webcharts\.(min\.)?css/.test(_link.href)) head.removeChild(_link);
             }
 
-            //Load Webcharts .js file.
+            //Load Webcharts .css file.
             var link = document.createElement('link');
             link.type = 'text/css';
             link.rel = 'stylesheet';
-            link.href = 'https://cdn.rawgit.com/RhoInc/Webcharts/' + d.name + '/css/webcharts.css';
+            link.href =
+                'https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@' + d.name + '/css/webcharts.css';
             head.appendChild(link);
 
             //Redraw table and chart.
@@ -969,131 +1114,47 @@
                 var webChartsExists = window.webCharts !== undefined;
                 if (webChartsExists) {
                     clearInterval(webChartsLoading);
-                    getConfiguration.call(
-                        context,
-                        context.chartConfiguration === undefined,
-                        context.data === undefined,
-                        context.branch === undefined
-                    );
-                    prepareTable.call(context);
-                    prepareChart.call(context);
-                    init$1.call(context, context.data === undefined);
+                    try {
+                        prepareTable.call(context);
+                        prepareChart.call(context);
+                        init$1.call(context, true, true, context.data === undefined);
+                    } catch (err) {
+                        console.warn(err);
+                        context.containers.chart.text(
+                            'Webcharts branch ' +
+                                d.name +
+                                ' is experiencing technical difficulties.  Please select another branch or version.'
+                        );
+                    }
                 }
             }, 25);
         });
     }
-
-    var _typeof =
-        typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
-            ? function(obj) {
-                  return typeof obj;
-              }
-            : function(obj) {
-                  return obj &&
-                      typeof Symbol === 'function' &&
-                      obj.constructor === Symbol &&
-                      obj !== Symbol.prototype
-                      ? 'symbol'
-                      : typeof obj;
-              };
-
-    var slicedToArray = (function() {
-        function sliceIterator(arr, i) {
-            var _arr = [];
-            var _n = true;
-            var _d = false;
-            var _e = undefined;
-
-            try {
-                for (
-                    var _i = arr[Symbol.iterator](), _s;
-                    !(_n = (_s = _i.next()).done);
-                    _n = true
-                ) {
-                    _arr.push(_s.value);
-
-                    if (i && _arr.length === i) break;
-                }
-            } catch (err) {
-                _d = true;
-                _e = err;
-            } finally {
-                try {
-                    if (!_n && _i['return']) _i['return']();
-                } finally {
-                    if (_d) throw _e;
-                }
-            }
-
-            return _arr;
-        }
-
-        return function(arr, i) {
-            if (Array.isArray(arr)) {
-                return arr;
-            } else if (Symbol.iterator in Object(arr)) {
-                return sliceIterator(arr, i);
-            } else {
-                throw new TypeError('Invalid attempt to destructure non-iterable instance');
-            }
-        };
-    })();
 
     function settings() {
         var context = this;
 
         this.containers.settings.forEach(function(container) {
             container.select('textarea').on('change', function(d) {
-                var updatedSettings = JSON.parse(this.value);
+                var updatedSettings = JSON5.parse(this.value);
 
-                if (d.property !== 'general') {
+                //Update x, y, and mark settings.
+                if (d.setting !== 'general') {
                     context.settings[d.setting] = updatedSettings;
+                    context.settings.chart[d.setting] = updatedSettings;
                     context.chart.config[d.setting] = updatedSettings;
-                } else {
+                }
+                //Update general settings.
+                else {
                     var properties = Object.keys(updatedSettings).filter(function(key) {
                         return ['x', 'y', 'marks'].indexOf(key) < 0;
                     });
-                    var _x$y$marks = {
-                        x: context.settings.x,
-                        y: context.settings.y,
-                        marks: context.settings.marks
-                    };
-
-                    var _x$y$marks2 = slicedToArray(_x$y$marks, 2);
-
-                    context.settings = _x$y$marks2[0];
-                    chart.config = _x$y$marks2[1];
-                    var _iteratorNormalCompletion = true;
-                    var _didIteratorError = false;
-                    var _iteratorError = undefined;
-
-                    try {
-                        for (
-                            var _iterator = properties[Symbol.iterator](), _step;
-                            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-                            _iteratorNormalCompletion = true
-                        ) {
-                            var property = _step.value;
-
-                            var _updatedSettings$prop = slicedToArray(updatedSettings[property], 2);
-
-                            context.settings[property] = _updatedSettings$prop[0];
-                            context.chart.config[property] = _updatedSettings$prop[1];
-                        }
-                    } catch (err) {
-                        _didIteratorError = true;
-                        _iteratorError = err;
-                    } finally {
-                        try {
-                            if (!_iteratorNormalCompletion && _iterator.return) {
-                                _iterator.return();
-                            }
-                        } finally {
-                            if (_didIteratorError) {
-                                throw _iteratorError;
-                            }
-                        }
-                    }
+                    properties.forEach(function(property) {
+                        var setting = updatedSettings[property];
+                        context.settings.general[property] = setting;
+                        context.settings.chart[property] = setting;
+                        context.chart.config[property] = setting;
+                    });
                 }
 
                 context.chart.draw();
@@ -1136,7 +1197,7 @@
         throw new Error('Unable to copy [obj]! Its type is not supported.');
     }
 
-    function callbacks() {
+    function callbacks$1() {
         var context = this;
 
         this.containers.callbacks.forEach(function(container) {
@@ -1187,16 +1248,18 @@
 
     function eventListeners() {
         renderChart.call(this);
+        chartConfigurationChange.call(this);
+        dataChange.call(this);
         branchChange.call(this);
         settings.call(this);
-        callbacks.call(this);
+        callbacks$1.call(this);
     }
 
     function configTester(element) {
         var dataPath =
             arguments.length > 1 && arguments[1] !== undefined
                 ? arguments[1]
-                : 'https://cdn.rawgit.com/RhoInc/viz-library/master';
+                : 'https://raw.githubusercontent.com/RhoInc/data-library/master';
 
         var configTester = {
             init: init,
@@ -1219,10 +1282,10 @@
             settings: {
                 data: null,
                 chart: null,
-                general: null,
+                x: null,
                 y: null,
                 marks: null,
-                x: null
+                general: null
             },
 
             //Callbacks is an object whose methods become chart callbacks.

@@ -1,6 +1,6 @@
 export default function scatterPlot() {
     return {
-        data: './data/iris.csv',
+        data: './data/miscellaneous/iris.csv',
         x: {
             type: 'linear',
             column: 'sepal width',

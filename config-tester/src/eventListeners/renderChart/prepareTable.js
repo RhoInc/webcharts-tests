@@ -1,13 +1,16 @@
 export default function prepareTable() {
-    if (this.table) this.table.destroy();
+    if (this.table && this.table.destroy) this.table.destroy();
+    else this.containers.dataPreview.selectAll('*').remove();
 
     this.table = new webCharts.createTable(this.containers.dataPreview.node());
     this.table.ct = this;
 
     //on init()
     this.table.on('init', function() {
-        this.config.cols = Object.keys(this.data.raw[0]).filter(key => key !== 'index');
-        this.config.headers = this.config.cols.slice();
+        if (this.data) {
+            this.config.cols = Object.keys(this.data.raw[0]).filter(key => key !== 'index');
+            this.config.headers = this.config.cols.slice();
+        }
     });
 
     //on draw()

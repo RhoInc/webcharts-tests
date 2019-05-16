@@ -19,7 +19,7 @@ export default function branchChange() {
         //Load Webcharts .js file.
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = `https://cdn.rawgit.com/RhoInc/Webcharts/${d.name}/build/webcharts.js`;
+        script.src = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${d.name}/build/webcharts.js`;
         head.appendChild(script);
 
         //Disable Webcharts .css file.
@@ -36,11 +36,11 @@ export default function branchChange() {
             if (/webcharts\.(min\.)?css/.test(link.href)) head.removeChild(link);
         }
 
-        //Load Webcharts .js file.
+        //Load Webcharts .css file.
         const link = document.createElement('link');
         link.type = 'text/css';
         link.rel = 'stylesheet';
-        link.href = `https://cdn.rawgit.com/RhoInc/Webcharts/${d.name}/css/webcharts.css`;
+        link.href = `https://cdn.jsdelivr.net/gh/RhoInc/Webcharts@${d.name}/css/webcharts.css`;
         head.appendChild(link);
 
         //Redraw table and chart.
@@ -48,15 +48,18 @@ export default function branchChange() {
             const webChartsExists = window.webCharts !== undefined;
             if (webChartsExists) {
                 clearInterval(webChartsLoading);
-                getConfiguration.call(
-                    context,
-                    context.chartConfiguration === undefined,
-                    context.data === undefined,
-                    context.branch === undefined
-                );
-                prepareTable.call(context);
-                prepareChart.call(context);
-                init.call(context, context.data === undefined);
+                try {
+                    prepareTable.call(context);
+                    prepareChart.call(context);
+                    init.call(context, true, true, context.data === undefined);
+                } catch (err) {
+                    console.warn(err);
+                    context.containers.chart.text(
+                        `Webcharts branch ${
+                            d.name
+                        } is experiencing technical difficulties.  Please select another branch or version.`
+                    );
+                }
             }
         }, 25);
     });

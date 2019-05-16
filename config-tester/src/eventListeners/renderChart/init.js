@@ -1,4 +1,4 @@
-export default function init(loadData = true) {
+export default function init(table = true, chart = true, loadData = true) {
     if (loadData)
         d3.csv(
             `${this.dataPath}/${this.dataFile}`,
@@ -8,12 +8,12 @@ export default function init(loadData = true) {
             },
             data => {
                 this.data = data;
-                this.table.init(data);
-                this.chart.init(data);
+                if (table) this.table.init(data);
+                if (chart) this.chart.init(data);
             }
         );
     else {
-        this.table.init(this.data);
-        this.chart.init(this.data);
+        if (table) this.table.init(this.data);
+        if (chart) this.chart.init(this.data);
     }
 }

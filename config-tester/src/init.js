@@ -1,47 +1,25 @@
 import loadChartConfigurations from './init/loadChartConfigurations';
 import loadData from './init/loadData';
 import loadBranches from './init/loadBranches';
+import updateChartConfigurations from './init/updateChartConfigurations';
+import updateData from './init/updateData';
+import updateBranches from './init/updateBranches';
 
 export default function init() {
-    const context = this;
+    Promise.all([
+        loadChartConfigurations.call(this),
+        loadData.call(this),
+        loadBranches.call(this)
+    ]).then(values => {
+        const [chartConfigurations, data, branches] = values;
 
-    //Add viz-library data to data dropdown.
-    loadChartConfigurations.call(this).then(function(chartConfigurations) {
-        context.chartConfigurations = chartConfigurations;
-        context.containers.controls.settings
-            .selectAll('option')
-            .data(chartConfigurations, d => d.type)
-            .enter()
-            .append('option')
-            .text(d => d.type);
+        updateChartConfigurations.call(this, chartConfigurations);
+        updateData.call(this, data);
+        updateBranches.call(
+            this,
+            Array.isArray(branches) && branches.length ? branches : [{ name: 'master' }]
+        );
 
-        return chartConfigurations;
-    });
-
-    //Add viz-library data to data dropdown.
-    loadData.call(this).then(function(data) {
-        context.data = data;
-        context.containers.controls.data
-            .selectAll('option')
-            .data(data)
-            .enter()
-            .append('option')
-            .text(d => d.rel_path);
-
-        return data;
-    });
-
-    //Add Webcharts branches to branch dropdown.
-    loadBranches.call(this).then(function(branches) {
-        if (!(Array.isArray(branches) && branches.length)) branches = [{ name: 'master' }];
-        context.branches = branches;
-        context.containers.controls.branches
-            .selectAll('option')
-            .data(branches, d => (d.commit ? d.commit.sha : d.name))
-            .enter()
-            .append('option')
-            .text(d => d.name);
-
-        return branches;
+        this.containers.controls.render.node().click();
     });
 }

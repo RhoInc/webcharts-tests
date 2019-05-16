@@ -3,11 +3,7 @@ export default function loadData() {
 
     return new Promise(function(resolve, reject) {
         const req = new XMLHttpRequest();
-        req.open(
-            'GET',
-            'https://rawgit.com/RhoInc/viz-library/master/util/web/data/dataFiles.json',
-            true
-        );
+        req.open('GET', 'https://cdn.jsdelivr.net/gh/RhoInc/data-library/dataFiles.json', true);
         req.onload = function() {
             if (req.status == 200)
                 resolve(

@@ -3,25 +3,25 @@ export default function settings() {
 
     this.containers.settings.forEach(container => {
         container.select('textarea').on('change', function(d) {
-            const updatedSettings = JSON.parse(this.value);
+            const updatedSettings = JSON5.parse(this.value);
 
-            if (d.property !== 'general') {
+            //Update x, y, and mark settings.
+            if (d.setting !== 'general') {
                 context.settings[d.setting] = updatedSettings;
+                context.settings.chart[d.setting] = updatedSettings;
                 context.chart.config[d.setting] = updatedSettings;
-            } else {
+            }
+            //Update general settings.
+            else {
                 const properties = Object.keys(updatedSettings).filter(
                     key => ['x', 'y', 'marks'].indexOf(key) < 0
                 );
-                [context.settings, chart.config] = {
-                    x: context.settings.x,
-                    y: context.settings.y,
-                    marks: context.settings.marks
-                };
-                for (const property of properties) {
-                    [context.settings[property], context.chart.config[property]] = updatedSettings[
-                        property
-                    ];
-                }
+                properties.forEach(function(property) {
+                    const setting = updatedSettings[property];
+                    context.settings.general[property] = setting;
+                    context.settings.chart[property] = setting;
+                    context.chart.config[property] = setting;
+                });
             }
 
             context.chart.draw();
